@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takuwaku | Sabores de Asia</title>
+    <!-- Importación de fuentes amigables y legibles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Definición de la Paleta de Colores Oficial de Takuwaku */
+        :root {
+            --color-primary: #68BAAB;       /* Verde Menta Principal */
+            --color-dark-teal: #078A85;     /* Secundario: Menta/Teal Oscuro */
+            --color-dark: #0B1D21;          /* Secundario: Negro Carbón Azulado */
+            --color-cream: #EDD5C5;         /* Secundario: Crema Cálido */
+            --color-logo: #E81E4A;          /* Color del Logo: Rojo Fucsia */
+            --color-white: #ffffff;
+            
+            --font-display: 'Fredoka', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--color-primary);
+            font-family: var(--font-body);
+            color: var(--color-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+
+        /* Cabecera y Navegación */
+        header {
+            width: 100%;
+            max-width: 600px;
+            margin: 25px auto 10px auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            background-color: var(--color-cream);
+            border: 4px solid var(--color-dark);
+            border-radius: 50px;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 5px 5px 0px var(--color-dark);
+        }
+
+        /* Enlace del logotipo en el Navbar */
+        .nav-logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        /* Versión reducida del logo oficial para el Navbar */
+        .nav-logo-img {
+            height: 38px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--color-dark);
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(11, 29, 33, 0.08);
+        }
+
+        .nav-btn.active {
+            background-color: var(--color-logo);
+            color: var(--color-white);
+            border: 2px solid var(--color-dark);
+            box-shadow: 2px 2px 0px var(--color-dark);
+        }
+
+        /* Contenedor Principal (Tarjeta) */
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--color-cream);
+            border: 4px solid var(--color-dark);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 540px;
+            padding: 40px 30px;
+            box-shadow: 8px 8px 0px var(--color-dark);
+            display: none; /* Control de Vistas por JS */
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.93);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Sección: INICIO (Coming Soon) */
+        .brand-logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        /* Estilo para la imagen del Logotipo Oficial en el contenido */
+        .logo-img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 18px;
+            color: var(--color-dark);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--color-dark-teal);
+            color: var(--color-white);
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 2px solid var(--color-dark);
+            box-shadow: 2.5px 2.5px 0px var(--color-dark);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ffdd57;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.4s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+
+        p.description {
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: var(--color-dark);
+            margin-bottom: 30px;
+        }
+
+        .btn-instagram {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: var(--color-logo);
+            color: var(--color-white);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            width: 100%;
+            padding: 16px 24px;
+            border: 3px solid var(--color-dark);
+            border-radius: 50px;
+            box-shadow: 4px 4px 0px var(--color-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-instagram:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px var(--color-dark);
+        }
+
+        .btn-instagram:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px 0px var(--color-dark);
+        }
+
+        /* Sección: SOBRE NOSOTROS */
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--color-dark-teal);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0.5px 0.5px 0px var(--color-dark);
+        }
+
+        .section-text {
+            font-size: 0.94rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: var(--color-dark);
+        }
+
+        .divider {
+            border: none;
+            height: 4px;
+            background-color: var(--color-dark);
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+
+        /* Retícula de Valores */
+        .values-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .value-card {
+            background-color: var(--color-white);
+            border: 2px solid var(--color-dark);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 3.5px 3.5px 0px var(--color-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .value-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.98rem;
+            color: var(--color-logo);
+        }
+
+        .value-desc {
+            font-size: 0.82rem;
+            line-height: 1.45;
+            color: var(--color-dark);
+            opacity: 0.9;
+        }
+
+        /* Pie de Página */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            color: var(--color-dark);
+        }
+
+        footer a {
+            color: var(--color-logo);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Adaptación Responsiva para Celulares */
+        @media (max-width: 480px) {
+            .card {
+                padding: 30px 20px;
+            }
+            .logo-img {
+                max-width: 170px;
+            }
+            .nav-logo-img {
+                height: 32px;
+            }
+            h1 {
+                font-size: 1.55rem;
+            }
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+            header {
+                margin: 15px auto 5px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabecera de Navegación -->
+    <header>
+        <nav>
+            <!-- Logotipo oficial idéntico en el Navbar -->
+            <a href="#" class="nav-logo-link" onclick="switchTab('inicio')">
+                <img src="logoTW.png" class="nav-logo-img" alt="Logo Takuwaku">
+            </a>
+            <div class="nav-tabs">
+                <button class="nav-btn active" id="btn-inicio" onclick="switchTab('inicio')">Inicio</button>
+                <button class="nav-btn" id="btn-about" onclick="switchTab('about')">Nosotros</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main>
+        
+        <!-- VISTA: INICIO (Expectativa / Próximamente) -->
+        <section class="card active" id="view-inicio">
+            <div class="brand-logo-container">
+                <!-- Logotipo de imagen oficial -->
+                <img src="logoTW.png" class="logo-img" alt="Logo Takuwaku">
+            </div>
+            
+            <h1>¡Algo muy emocionante se está cocinando! 🥢✨</h1>
+            
+            <div class="status-badge">
+                <span class="badge-dot"></span>
+                Próximamente
+            </div>
+            
+            <p class="description">
+                En <strong>Takuwaku</strong> estamos preparando los motores para ser tu puente directo a los sabores y antojos más deliciosos de Asia. Muy pronto podrás encontrar la mejor selección de snacks, bebidas exóticas y sopas instantáneas de Japón, Corea y China en un solo lugar. Actualmente <strong>no nos encontramos en operaciones comerciales</strong>, pero estamos trabajando activamente para abrir nuestras puertas virtuales muy pronto en este dominio <strong>takuwaku.shop</strong>. ⛩️📦
+            </p>
+            
+            <!-- Botón a Instagram de la Tienda -->
+            <a href="https://instagram.com/tienda.takuwaku" target="_blank" class="btn-instagram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                ¡Sigue nuestro viaje en Instagram!
+            </a>
+        </section>
+
+        <!-- VISTA: SOBRE NOSOTROS (Misión, Propósito, Visión y Valores) -->
+        <section class="card" id="view-about">
+            
+            <!-- Misión -->
+            <h2 class="section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Nuestra Misión
+            </h2>
+            <p class="section-text">
+                Ofrecer una auténtica selección de snacks, bebidas y sopas enfocadas en Japón y Asia, con el propósito de hacer accesible la experiencia de disfrutar sabores difíciles de encontrar en nuestra región. Existimos para ser el puente directo que traiga la fascinante cultura asiática a nuestra comunidad, demostrando que la distancia geográfica no tiene por qué ser un obstáculo para explorar el mundo a través del paladar.
+            </p>
+
+            <!-- Propósito -->
+            <h2 class="section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                ¿Por qué existimos?
+            </h2>
+            <p class="section-text">
+                Existimos porque creemos que la distancia geográfica no debería ser un obstáculo para explorar otras culturas. Queremos ser el puente directo que traiga la fascinante cultura asiática a nuestra comunidad a través de sus sabores, facilitando probar y consumir estos deliciosos productos de forma rápida y segura.
+            </p>
+
+            <!-- Visión -->
+            <h2 class="section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Nuestra Visión
+            </h2>
+            <p class="section-text">
+                Convertirnos en la primera opción de muchos para adquirir productos asiáticos (japoneses, chinos, sur coreanos, etc.), y diversificar nuestro catálogo incorporando no solo snacks o refrescos, sino también juguetes, libros (manga) y productos electrónicos de una manera directa.
+            </p>
+
+            <hr class="divider">
+
+            <!-- Valores -->
+            <h2 class="section-title" style="color: var(--color-logo);">Nuestros Valores</h2>
+            <div class="values-grid">
+                
+                <!-- Valor 1: Amabilidad -->
+                <div class="value-card">
+                    <div class="value-header">
+                        <span>🌸</span> Amabilidad
+                    </div>
+                    <div class="value-desc">Brindar siempre un trato cálido y atento a nuestros clientes.</div>
+                </div>
+
+                <!-- Valor 2: Entusiasmo -->
+                <div class="value-card">
+                    <div class="value-header">
+                        <span>⚡</span> Entusiasmo
+                    </div>
+                    <div class="value-desc">¡Puro espíritu Wakuwaku! Transmitimos emoción en lo que hacemos.</div>
+                </div>
+
+                <!-- Valor 3: Resiliencia -->
+                <div class="value-card">
+                    <div class="value-header">
+                        <span>🌱</span> Resiliencia
+                    </div>
+                    <div class="value-desc">Capacidad para adaptarnos y superar cualquier reto con energía.</div>
+                </div>
+
+                <!-- Valor 4: Compromiso -->
+                <div class="value-card">
+                    <div class="value-header">
+                        <span>🤝</span> Compromiso
+                    </div>
+                    <div class="value-desc">Dedicación completa para asegurar la calidad y entrega de tus snacks.</div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pie de Página -->
+    <footer>
+        <p>Takuwaku © 2026 | Síguenos en <a href="https://instagram.com/tienda.takuwaku" target="_blank">@tienda.takuwaku</a></p>
+    </footer>
+
+    <!-- Lógica JavaScript para la SPA -->
+    <script>
+        function switchTab(tabName) {
+            const viewInicio = document.getElementById('view-inicio');
+            const viewAbout = document.getElementById('view-about');
+            const btnInicio = document.getElementById('btn-inicio');
+            const btnAbout = document.getElementById('btn-about');
+
+            if (tabName === 'inicio') {
+                viewInicio.classList.add('active');
+                viewAbout.classList.remove('active');
+                btnInicio.classList.add('active');
+                btnAbout.classList.remove('active');
+            } else if (tabName === 'about') {
+                viewAbout.classList.add('active');
+                viewInicio.classList.remove('active');
+                btnAbout.classList.add('active');
+                btnInicio.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
+
