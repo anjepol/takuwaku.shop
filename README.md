@@ -1,0 +1,2 @@
+# takuwaku.shop
+Web estática
