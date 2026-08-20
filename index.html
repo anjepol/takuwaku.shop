@@ -313,6 +313,7 @@
                                 <input type="number" step="0.01" id="prod-price" required placeholder="Precio ($)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
                                 <input type="number" id="prod-stock" required placeholder="Stock" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
                             </div>
+                            <input type="number" step="0.01" id="prod-sale-price" placeholder="Precio en oferta (opcional)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
                             <div class="grid grid-cols-2 gap-2">
                                 <select id="prod-category" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
                                     <option value="Snacks">Snacks</option>
@@ -321,11 +322,21 @@
                                     <option value="Coleccionables">Coleccionables</option>
                                 </select>
                                 <select id="prod-img" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
-                                    <option value="pepero">Dulce/Snack</option>
-                                    <option value="ramen">Sopa</option>
-                                    <option value="ramune">Bebida</option>
-                                    <option value="toy">Manga</option>
+                                    <option value="pepero">Ícono: Dulce/Snack</option>
+                                    <option value="ramen">Ícono: Sopa</option>
+                                    <option value="ramune">Ícono: Bebida</option>
+                                    <option value="toy">Ícono: Manga</option>
                                 </select>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg brutal-border-sm">
+                                <label class="text-xs font-bold text-[#0B1D21]/70 block mb-2">Foto real del producto (opcional, reemplaza el ícono)</label>
+                                <input type="text" id="prod-image-url" placeholder="Pega un link de imagen (https://...)" class="w-full bg-[#EDD5C5]/30 p-2 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none mb-2">
+                                <p class="text-[10px] text-[#0B1D21]/50 mb-2">— o si ya activaste Firebase Storage —</p>
+                                <input type="file" id="prod-image-file" accept="image/*" onchange="previewProductImage(event)" class="w-full text-xs">
+                                <div id="prod-image-preview-wrap" class="hidden mt-2 flex items-center gap-2">
+                                    <img id="prod-image-preview" class="w-14 h-14 object-cover rounded-lg brutal-border-sm">
+                                    <button type="button" onclick="removeProductImage()" class="text-xs font-bold text-[#E81E4A]">Quitar foto</button>
+                                </div>
                             </div>
                             <div class="flex gap-2 mt-2">
                                 <button type="submit" id="form-submit-btn" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">
@@ -340,7 +351,12 @@
                 </div>
 
                 <div class="lg:col-span-2 flex flex-col gap-4">
-                    <div class="bg-white brutal-border brutal-shadow rounded-2xl p-6">
+                    <div class="flex gap-2">
+                        <button onclick="switchAdminSubtab('inventario')" id="admin-subtab-inventario" class="admin-subtab bg-[#E81E4A] text-white font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm">Inventario</button>
+                        <button onclick="switchAdminSubtab('pedidos')" id="admin-subtab-pedidos" class="admin-subtab bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm">Pedidos</button>
+                    </div>
+
+                    <div id="admin-view-inventario" class="bg-white brutal-border brutal-shadow rounded-2xl p-6">
                         <h3 class="text-xl font-bold font-display flex items-center gap-2 mb-6"><i data-lucide="package" class="w-6 h-6 text-[#078A85]"></i> Inventario en Tiempo Real</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse min-w-[500px]">
@@ -356,6 +372,11 @@
                                 <tbody id="admin-inventory-table"></tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div id="admin-view-pedidos" class="bg-white brutal-border brutal-shadow rounded-2xl p-6 hidden">
+                        <h3 class="text-xl font-bold font-display flex items-center gap-2 mb-6"><i data-lucide="receipt" class="w-6 h-6 text-[#078A85]"></i> Historial de Pedidos</h3>
+                        <div id="admin-orders-list" class="flex flex-col gap-3"></div>
                     </div>
                 </div>
             </div>
@@ -426,12 +447,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import {
-            getFirestore, collection, doc, getDocs, setDoc, deleteDoc,
-            onSnapshot, addDoc, runTransaction, serverTimestamp
+            getFirestore, collection, doc, getDocs, setDoc, deleteDoc, updateDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import {
             getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getStorage, ref as storageRef, uploadBytes, getDownloadURL
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
         // 🔧 Configuración del proyecto Firebase "takuwaku-e5d77"
         const firebaseConfig = {
@@ -446,12 +470,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         // Se expone todo lo necesario en window para que el script clásico (abajo) lo use.
         window.fb = {
-            db, auth, collection, doc, getDocs, setDoc, deleteDoc,
-            onSnapshot, addDoc, runTransaction, serverTimestamp,
-            signInWithEmailAndPassword, onAuthStateChanged, signOut
+            db, auth, storage, collection, doc, getDocs, setDoc, deleteDoc, updateDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit,
+            signInWithEmailAndPassword, onAuthStateChanged, signOut,
+            storageRef, uploadBytes, getDownloadURL
         };
 
         // Avisa al resto de la app que Firebase ya está listo para usarse.
@@ -476,12 +502,28 @@
             { id: "p6", name: "Manga Shingeki no Kyojin", price: 149.00, category: "Coleccionables", stock: 3, preset: "toy" }
         ];
 
+        // Devuelve el precio que realmente se cobra: el de oferta si existe y es menor al normal.
+        function getEffectivePrice(p) {
+            return (typeof p.salePrice === 'number' && p.salePrice > 0 && p.salePrice < p.price) ? p.salePrice : p.price;
+        }
+
+        // Devuelve el HTML de la imagen del producto: foto real subida si existe, o el ícono SVG de respaldo.
+        function productImageHTML(p, extraClass = '') {
+            if (p.imageUrl) {
+                return `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover ${extraClass}">`;
+            }
+            return imagePresets[p.preset] || imagePresets.pepero;
+        }
+
         let products = [];
         let cart = {};
         const WHATSAPP_NUMBER = "5212471393115"; 
         let editingProductId = null;
         let isAdmin = false;
         let productsUnsub = null; // para poder cancelar el listener de Firestore si hiciera falta
+        let ordersUnsub = null; // listener del historial de pedidos (solo activo si hay sesión admin)
+        let pendingImageFile = null; // archivo de imagen seleccionado en el form, pendiente de subir
+        let currentAdminSubtab = 'inventario';
 
         // Arranca la app solo cuando Firebase ya está inicializado (ver script type="module" arriba)
         function bootApp() {
@@ -500,9 +542,11 @@
                     gate.classList.add('hidden');
                     panel.classList.remove('hidden');
                     renderAdminInventory();
+                    listenToOrders();
                 } else {
                     gate.classList.remove('hidden');
                     panel.classList.add('hidden');
+                    if (ordersUnsub) { ordersUnsub(); ordersUnsub = null; }
                 }
             });
 
@@ -542,7 +586,84 @@
             });
         }
 
-        // ================= AUTENTICACIÓN DE ADMIN =================
+        // Escucha en tiempo real la colección "orders" (solo se activa cuando hay sesión admin,
+        // porque las reglas de Firestore restringen su lectura a usuarios autenticados).
+        function listenToOrders() {
+            const { db, collection, query, orderBy, limit, onSnapshot } = window.fb;
+            const ordersRef = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
+
+            if (ordersUnsub) ordersUnsub();
+            ordersUnsub = onSnapshot(ordersRef, (snapshot) => {
+                const orders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAdminOrders(orders);
+            }, (err) => {
+                console.error('Firestore orders onSnapshot error:', err);
+            });
+        }
+
+        function switchAdminSubtab(tab) {
+            currentAdminSubtab = tab;
+            document.getElementById('admin-view-inventario').classList.toggle('hidden', tab !== 'inventario');
+            document.getElementById('admin-view-pedidos').classList.toggle('hidden', tab !== 'pedidos');
+
+            document.querySelectorAll('.admin-subtab').forEach(btn => {
+                btn.className = "admin-subtab bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm";
+            });
+            document.getElementById(`admin-subtab-${tab}`).className = "admin-subtab bg-[#E81E4A] text-white font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm";
+        }
+
+        function renderAdminOrders(orders) {
+            const list = document.getElementById('admin-orders-list');
+            if (!list) return;
+
+            if (orders.length === 0) {
+                list.innerHTML = `<p class="text-sm text-[#0B1D21]/60 text-center py-8">Todavía no hay pedidos registrados.</p>`;
+                return;
+            }
+
+            const statusColors = {
+                pendiente: 'bg-[#ffdd57] text-[#0B1D21]',
+                completado: 'bg-[#078A85] text-white',
+                cancelado: 'bg-[#E81E4A] text-white'
+            };
+
+            list.innerHTML = orders.map(o => {
+                const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+                const itemsSummary = (o.items || []).map(it => `${it.qty}x ${it.name}`).join(', ');
+                const statusClass = statusColors[o.status] || statusColors.pendiente;
+
+                return `
+                <div class="brutal-border-sm rounded-xl p-4 bg-[#EDD5C5]/20">
+                    <div class="flex justify-between items-start gap-2 mb-2">
+                        <div>
+                            <p class="font-display font-bold text-sm text-[#0B1D21]">${o.customerName || 'Cliente'}</p>
+                            <p class="text-xs text-[#0B1D21]/60">${date}</p>
+                        </div>
+                        <span class="font-display font-black text-[#E81E4A]">$${(o.total || 0).toFixed(2)}</span>
+                    </div>
+                    <p class="text-xs text-[#0B1D21]/80 mb-3">${itemsSummary}</p>
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span class="text-[#0B1D21]/60">🚚 ${o.deliveryMethod || '—'} · 💵 ${o.paymentMethod || '—'}</span>
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="${statusClass} font-bold px-3 py-1.5 rounded-full brutal-border-sm text-xs focus:outline-none">
+                            <option value="pendiente" ${o.status === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="completado" ${o.status === 'completado' ? 'selected' : ''}>Completado</option>
+                            <option value="cancelado" ${o.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            const { db, doc, updateDoc } = window.fb;
+            try {
+                await updateDoc(doc(db, 'orders', orderId), { status });
+                showToast('Estado del pedido actualizado');
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo actualizar el estado', 'error');
+            }
+        }
         function handleAdminLogin(e) {
             e.preventDefault();
             const { auth, signInWithEmailAndPassword } = window.fb;
@@ -663,12 +784,16 @@
                 const cardsHTML = catProducts.map((p) => {
                     const inCartQty = cart[p.id] || 0;
                     const availableStock = p.stock - inCartQty;
+                    const effectivePrice = getEffectivePrice(p);
+                    const onSale = effectivePrice < p.price;
                     let badgeHTML = '';
                     let disableBtn = false;
 
                     if (availableStock <= 0) {
                         badgeHTML = `<span class="absolute top-3 left-3 bg-[#E81E4A] text-white border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full z-10 shadow-sm">Agotado</span>`;
                         disableBtn = true;
+                    } else if (onSale) {
+                        badgeHTML = `<span class="absolute top-3 left-3 bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full z-10 shadow-sm">🔥 Oferta</span>`;
                     } else if (availableStock <= 3) {
                         badgeHTML = `<span class="absolute top-3 left-3 bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full z-10 shadow-sm animate-pulse">¡Últimas ${availableStock}!</span>`;
                     }
@@ -677,12 +802,16 @@
                     const delay = (delayCounter * 0.08); 
                     delayCounter++;
 
+                    const priceHTML = onSale
+                        ? `<span class="flex flex-col leading-tight"><span class="text-xs text-[#0B1D21]/50 line-through">$${p.price.toFixed(2)}</span><span class="font-display font-black text-base md:text-lg text-[#E81E4A]">$${effectivePrice.toFixed(2)}</span></span>`
+                        : `<span class="font-display font-black text-base md:text-lg text-[#0B1D21]">$${effectivePrice.toFixed(2)}</span>`;
+
                     return `
                     <div class="snap-item w-[200px] md:w-[240px] shrink-0 bg-white brutal-border brutal-shadow-sm rounded-2xl p-4 flex flex-col justify-between relative hover-float animate-pop-in" style="animation-delay: ${delay}s">
                         ${badgeHTML}
                         <div class="w-full aspect-square rounded-xl overflow-hidden brutal-border-sm mb-4 bg-[#EDD5C5]/30 group">
                             <div class="w-full h-full transition-transform duration-300 group-hover:scale-110">
-                                ${imagePresets[p.preset] || imagePresets.pepero}
+                                ${productImageHTML(p)}
                             </div>
                         </div>
                         <div>
@@ -690,7 +819,7 @@
                             <h4 class="font-display font-bold text-sm md:text-base text-[#0B1D21] line-clamp-2 mt-1 min-h-[2.5rem] md:min-h-[3rem] leading-tight">${p.name}</h4>
                         </div>
                         <div class="flex items-center justify-between mt-4 pt-4 border-t border-[#0B1D21]/10">
-                            <span class="font-display font-black text-base md:text-lg text-[#0B1D21]">$${p.price.toFixed(2)}</span>
+                            ${priceHTML}
                             <button onclick="addToCart('${p.id}')" ${disableBtn ? 'disabled' : ''} class="bg-[#E81E4A] text-white p-2 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center ${disableBtn ? 'opacity-40 cursor-not-allowed shadow-none' : ''}">
                                 <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i>
                             </button>
@@ -778,16 +907,17 @@
             cartKeys.forEach(productId => {
                 const p = products.find(p => p.id === productId);
                 const qty = cart[productId];
-                totalCount += qty; totalPrice += p.price * qty;
+                const effectivePrice = getEffectivePrice(p);
+                totalCount += qty; totalPrice += effectivePrice * qty;
 
                 container.innerHTML += `
                     <div class="bg-white p-3 rounded-xl brutal-border-sm brutal-shadow-sm flex items-center gap-3">
                         <div class="w-12 h-12 rounded-lg overflow-hidden brutal-border-sm shrink-0 bg-[#EDD5C5]/30">
-                            ${imagePresets[p.preset]}
+                            ${productImageHTML(p)}
                         </div>
                         <div class="flex-grow min-w-0">
                             <h5 class="font-display font-bold text-sm text-[#0B1D21] truncate">${p.name}</h5>
-                            <p class="text-xs text-[#078A85] font-semibold">$${(p.price * qty).toFixed(2)}</p>
+                            <p class="text-xs text-[#078A85] font-semibold">$${(effectivePrice * qty).toFixed(2)}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="changeCartQty('${productId}', -1)" class="w-6 h-6 bg-[#EDD5C5]/50 rounded-full brutal-border-sm flex items-center justify-center font-bold text-sm hover:bg-[#E81E4A] hover:text-white transition-colors">-</button>
@@ -826,7 +956,8 @@
             const { db, doc, runTransaction, collection, addDoc, serverTimestamp } = window.fb;
             const orderItems = Object.keys(cart).map(id => {
                 const p = products.find(p => p.id === id);
-                return { productId: id, name: p.name, price: p.price, qty: cart[id], subtotal: p.price * cart[id] };
+                const effectivePrice = getEffectivePrice(p);
+                return { productId: id, name: p.name, price: effectivePrice, qty: cart[id], subtotal: effectivePrice * cart[id] };
             });
             const total = orderItems.reduce((acc, it) => acc + it.subtotal, 0);
 
@@ -883,11 +1014,21 @@
             table.innerHTML = '';
             
             products.forEach(p => {
+                const onSale = typeof p.salePrice === 'number' && p.salePrice > 0 && p.salePrice < p.price;
+                const priceCell = onSale
+                    ? `<span class="line-through text-[#0B1D21]/40 text-xs mr-1">$${p.price.toFixed(2)}</span><span class="text-[#E81E4A] font-bold">$${p.salePrice.toFixed(2)}</span>`
+                    : `$${p.price.toFixed(2)}`;
+
                 table.innerHTML += `
                     <tr class="border-b border-[#0B1D21]/10 text-sm hover:bg-[#EDD5C5]/20 transition-colors">
-                        <td class="py-3 pl-2 font-display font-semibold">${p.name}</td>
+                        <td class="py-3 pl-2 font-display font-semibold">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg overflow-hidden brutal-border-sm shrink-0 bg-[#EDD5C5]/30">${productImageHTML(p)}</div>
+                                <span>${p.name}</span>
+                            </div>
+                        </td>
                         <td class="py-3 text-xs text-[#078A85]">${p.category}</td>
-                        <td class="py-3 font-bold">$${p.price.toFixed(2)}</td>
+                        <td class="py-3 font-bold">${priceCell}</td>
                         <td class="py-3 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button onclick="adjustAdminStock('${p.id}', -1)" class="w-6 h-6 bg-[#EDD5C5] rounded brutal-border-sm text-xs font-bold hover:bg-[#E81E4A] hover:text-white transition-colors">-</button>
@@ -942,18 +1083,51 @@
             }
         }
 
+        // ================= MANEJO DE IMAGEN REAL (Firebase Storage) =================
+        function previewProductImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            pendingImageFile = file;
+            const preview = document.getElementById('prod-image-preview');
+            preview.src = URL.createObjectURL(file);
+            document.getElementById('prod-image-preview-wrap').classList.remove('hidden');
+        }
+
+        function removeProductImage() {
+            pendingImageFile = null;
+            document.getElementById('prod-image-file').value = '';
+            document.getElementById('prod-image-url').value = '';
+            document.getElementById('prod-image-preview-wrap').classList.add('hidden');
+            // Si se estaba editando un producto que ya tenía foto, marcamos que debe quitarse al guardar.
+            if (editingProductId) window.__removeExistingImage = true;
+        }
+
         // ================= EDICIÓN DE PRODUCTOS =================
         function editProduct(id) {
             const p = products.find(p => p.id === id);
             if (!p) return;
             
             editingProductId = id;
+            pendingImageFile = null;
+            window.__removeExistingImage = false;
             
             document.getElementById('prod-name').value = p.name;
             document.getElementById('prod-price').value = p.price;
             document.getElementById('prod-stock').value = p.stock;
+            document.getElementById('prod-sale-price').value = p.salePrice || '';
             document.getElementById('prod-category').value = p.category;
             document.getElementById('prod-img').value = p.preset;
+            document.getElementById('prod-image-file').value = '';
+            document.getElementById('prod-image-url').value = (p.imageUrl && !p.imageUrl.includes('firebasestorage')) ? p.imageUrl : '';
+
+            const preview = document.getElementById('prod-image-preview');
+            const previewWrap = document.getElementById('prod-image-preview-wrap');
+            if (p.imageUrl) {
+                preview.src = p.imageUrl;
+                previewWrap.classList.remove('hidden');
+            } else {
+                previewWrap.classList.add('hidden');
+            }
 
             document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-5 h-5"></i> Editar Producto`;
             document.getElementById('form-submit-btn').innerText = "Guardar Cambios";
@@ -965,7 +1139,10 @@
 
         function cancelEdit() {
             editingProductId = null;
+            pendingImageFile = null;
+            window.__removeExistingImage = false;
             document.getElementById('add-product-form').reset();
+            document.getElementById('prod-image-preview-wrap').classList.add('hidden');
             
             document.getElementById('form-title').innerHTML = `<i data-lucide="plus-circle" class="w-5 h-5"></i> Nuevo Producto`;
             document.getElementById('form-submit-btn').innerText = "Agregar";
@@ -980,6 +1157,8 @@
             const name = document.getElementById('prod-name').value;
             const price = parseFloat(document.getElementById('prod-price').value);
             const stock = parseInt(document.getElementById('prod-stock').value);
+            const salePriceRaw = document.getElementById('prod-sale-price').value;
+            const salePrice = salePriceRaw ? parseFloat(salePriceRaw) : null;
             const category = document.getElementById('prod-category').value;
             const preset = document.getElementById('prod-img').value;
 
@@ -987,18 +1166,51 @@
                 showToast("Ingresa valores numéricos válidos", "error");
                 return;
             }
+            if (salePrice !== null && (isNaN(salePrice) || salePrice <= 0 || salePrice >= price)) {
+                showToast("El precio de oferta debe ser menor al precio normal", "error");
+                return;
+            }
 
-            const { db, doc, setDoc } = window.fb;
+            const submitBtn = document.getElementById('form-submit-btn');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Guardando...";
+
+            const { db, doc, setDoc, storage, storageRef, uploadBytes, getDownloadURL } = window.fb;
             const id = editingProductId || ('prod_' + Date.now());
 
             try {
-                await setDoc(doc(db, 'products', id), { name, price, stock, category, preset });
+                let imageUrl = null;
+                if (editingProductId) {
+                    const existing = products.find(p => p.id === editingProductId);
+                    imageUrl = existing?.imageUrl || null;
+                }
+                if (window.__removeExistingImage) imageUrl = null;
+
+                const pastedUrl = document.getElementById('prod-image-url').value.trim();
+                if (pastedUrl) imageUrl = pastedUrl; // el link pegado manualmente tiene prioridad si se escribió
+
+                if (pendingImageFile) {
+                    // Si además se seleccionó un archivo, subirlo a Storage tiene la prioridad más alta
+                    const fileRef = storageRef(storage, `products/${id}/${Date.now()}_${pendingImageFile.name}`);
+                    await uploadBytes(fileRef, pendingImageFile);
+                    imageUrl = await getDownloadURL(fileRef);
+                }
+
+                const productData = { name, price, stock, category, preset };
+                if (salePrice !== null) productData.salePrice = salePrice;
+                if (imageUrl) productData.imageUrl = imageUrl;
+
+                await setDoc(doc(db, 'products', id), productData);
                 showToast(editingProductId ? "¡Cambios guardados con éxito!" : "¡Nuevo Producto Agregado!");
                 cancelEdit();
                 // El onSnapshot en tiempo real refresca "products" y la tabla automáticamente.
             } catch (err) {
                 console.error(err);
                 showToast("No se pudo guardar el producto", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
             }
         }
     </script>
