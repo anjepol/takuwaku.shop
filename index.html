@@ -3,481 +3,1004 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takuwaku | Sabores de Asia</title>
-    <!-- Importación de fuentes amigables y legibles -->
+    <title>Takuwaku | Snacks Asiáticos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Iconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        /* Definición de la Paleta de Colores Oficial de Takuwaku */
         :root {
-            --color-primary: #68BAAB;       /* Verde Menta Principal */
-            --color-dark-teal: #078A85;     /* Secundario: Menta/Teal Oscuro */
-            --color-dark: #0B1D21;          /* Secundario: Negro Carbón Azulado */
-            --color-cream: #EDD5C5;         /* Secundario: Crema Cálido */
-            --color-logo: #E81E4A;          /* Color del Logo: Rojo Fucsia */
-            --color-white: #ffffff;
-            
-            --font-display: 'Fredoka', sans-serif;
-            --font-body: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --color-primary: #68BAAB;
+            --color-dark-teal: #078A85;
+            --color-dark: #0B1D21;
+            --color-cream: #EDD5C5;
+            --color-logo: #E81E4A;
         }
 
         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--color-primary);
-            font-family: var(--font-body);
             color: var(--color-dark);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow-x: hidden;
         }
 
-        /* Cabecera y Navegación */
-        header {
-            width: 100%;
-            max-width: 600px;
-            margin: 25px auto 10px auto;
-            padding: 0 20px;
+        h1, h2, h3, .font-display { font-family: 'Fredoka', sans-serif; }
+
+        /* Clases Neo-Brutalistas */
+        .brutal-border { border: 4px solid var(--color-dark); }
+        .brutal-border-sm { border: 2px solid var(--color-dark); }
+        .brutal-shadow { box-shadow: 6px 6px 0px var(--color-dark); }
+        .brutal-shadow-sm { box-shadow: 3px 3px 0px var(--color-dark); }
+        
+        .brutal-btn { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .brutal-btn:hover { transform: translateY(-3px); box-shadow: 6px 6px 0px var(--color-dark); }
+        .brutal-btn:active { transform: translateY(2px); box-shadow: 1px 1px 0px var(--color-dark); }
+
+        /* ==================== NUEVAS ANIMACIONES ==================== */
+        
+        /* 1. Salto del Carrito de Compras */
+        @keyframes cartBump {
+            0% { transform: scale(1) translateY(0); }
+            40% { transform: scale(1.25) translateY(-8px) rotate(-10deg); }
+            60% { transform: scale(1.15) translateY(-2px) rotate(5deg); }
+            100% { transform: scale(1) translateY(0) rotate(0); }
+        }
+        .animate-cart-bump { animation: cartBump 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* 2. Entrada Suave de Pantallas (Fade In Up) */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+
+        /* 3. Aparición "Pop" Escalonada de las Tarjetas (Stagger) */
+        @keyframes popInCard {
+            from { opacity: 0; transform: scale(0.85) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-pop-in {
+            animation: popInCard 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0; /* Empieza oculto para que la animación lo revele */
         }
 
-        nav {
-            background-color: var(--color-cream);
-            border: 4px solid var(--color-dark);
-            border-radius: 50px;
-            padding: 8px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 5px 5px 0px var(--color-dark);
-        }
+        /* 4. Efecto de flotación al pasar el mouse por los productos */
+        .hover-float { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-float:hover { transform: translateY(-6px); box-shadow: 6px 8px 0px var(--color-dark); }
 
-        /* Enlace del logotipo en el Navbar */
-        .nav-logo-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-
-        /* Versión reducida del logo oficial para el Navbar */
-        .nav-logo-img {
-            height: 38px;
-            width: auto;
-            display: block;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 6px;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--color-dark);
-            padding: 8px 18px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .nav-btn:hover {
-            background-color: rgba(11, 29, 33, 0.08);
-        }
-
-        .nav-btn.active {
-            background-color: var(--color-logo);
-            color: var(--color-white);
-            border: 2px solid var(--color-dark);
-            box-shadow: 2px 2px 0px var(--color-dark);
-        }
-
-        /* Contenedor Principal (Tarjeta) */
-        main {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            width: 100%;
-        }
-
-        .card {
-            background-color: var(--color-cream);
-            border: 4px solid var(--color-dark);
-            border-radius: 28px;
-            width: 100%;
-            max-width: 540px;
-            padding: 40px 30px;
-            box-shadow: 8px 8px 0px var(--color-dark);
-            display: none; /* Control de Vistas por JS */
-            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-        }
-
-        .card.active {
-            display: block;
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0.93);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Sección: INICIO (Coming Soon) */
-        .brand-logo-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-        }
-
-        /* Estilo para la imagen del Logotipo Oficial en el contenido */
-        .logo-img {
-            max-width: 200px;
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 10px auto;
-        }
-
-        h1 {
-            font-family: var(--font-display);
-            font-size: 1.9rem;
-            font-weight: 700;
-            line-height: 1.25;
-            margin-bottom: 18px;
-            color: var(--color-dark);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background-color: var(--color-dark-teal);
-            color: var(--color-white);
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 6px 16px;
-            border-radius: 50px;
-            border: 2px solid var(--color-dark);
-            box-shadow: 2.5px 2.5px 0px var(--color-dark);
-            margin-bottom: 25px;
-            text-transform: uppercase;
-        }
-
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #ffdd57;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 1.4s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 0.5; }
-            50% { transform: scale(1.3); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.5; }
-        }
-
-        p.description {
-            font-size: 0.98rem;
-            line-height: 1.6;
-            color: var(--color-dark);
-            margin-bottom: 30px;
-        }
-
-        .btn-instagram {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background-color: var(--color-logo);
-            color: var(--color-white);
-            font-family: var(--font-display);
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-decoration: none;
-            width: 100%;
-            padding: 16px 24px;
-            border: 3px solid var(--color-dark);
-            border-radius: 50px;
-            box-shadow: 4px 4px 0px var(--color-dark);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-instagram:hover {
-            transform: translateY(-2px);
-            box-shadow: 6px 6px 0px var(--color-dark);
-        }
-
-        .btn-instagram:active {
-            transform: translateY(2px);
-            box-shadow: 2px 2px 0px var(--color-dark);
-        }
-
-        /* Sección: SOBRE NOSOTROS */
-        .section-title {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            color: var(--color-dark-teal);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-shadow: 0.5px 0.5px 0px var(--color-dark);
-        }
-
-        .section-text {
-            font-size: 0.94rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            color: var(--color-dark);
-        }
-
-        .divider {
-            border: none;
-            height: 4px;
-            background-color: var(--color-dark);
-            margin: 30px 0;
-            border-radius: 10px;
-        }
-
-        /* Retícula de Valores */
-        .values-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .value-card {
-            background-color: var(--color-white);
-            border: 2px solid var(--color-dark);
-            border-radius: 16px;
-            padding: 14px;
-            box-shadow: 3.5px 3.5px 0px var(--color-dark);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .value-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: var(--font-display);
-            font-weight: 700;
-            font-size: 0.98rem;
-            color: var(--color-logo);
-        }
-
-        .value-desc {
-            font-size: 0.82rem;
-            line-height: 1.45;
-            color: var(--color-dark);
-            opacity: 0.9;
-        }
-
-        /* Pie de Página */
-        footer {
-            width: 100%;
-            text-align: center;
-            padding: 20px;
-            font-family: var(--font-display);
-            font-size: 0.85rem;
-            color: var(--color-dark);
-        }
-
-        footer a {
-            color: var(--color-logo);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* Adaptación Responsiva para Celulares */
-        @media (max-width: 480px) {
-            .card {
-                padding: 30px 20px;
-            }
-            .logo-img {
-                max-width: 170px;
-            }
-            .nav-logo-img {
-                height: 32px;
-            }
-            h1 {
-                font-size: 1.55rem;
-            }
-            .values-grid {
-                grid-template-columns: 1fr;
-            }
-            header {
-                margin: 15px auto 5px auto;
-            }
-        }
+        /* Ocultar scrollbars */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .snap-container { scroll-snap-type: x mandatory; }
+        .snap-item { scroll-snap-align: start; }
     </style>
 </head>
-<body>
+<body class="flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Cabecera de Navegación -->
-    <header>
-        <nav>
-            <!-- Logotipo oficial idéntico en el Navbar -->
-            <a href="#" class="nav-logo-link" onclick="switchTab('inicio')">
-                <img src="logoTW.png" class="nav-logo-img" alt="Logo Takuwaku">
+    <!-- Notificaciones Toast -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+    <a href="https://wa.me/5212471393115?text=⛩️%20¡Hola%20Takuwaku!%20Tengo%20una%20duda..." target="_blank" class="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-3 md:p-4 rounded-full brutal-border brutal-shadow-sm brutal-btn flex items-center justify-center hover:scale-105 transition-transform" aria-label="Contactar por WhatsApp">
+        <svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+    </a>
+
+    <!-- NAVEGACIÓN PRINCIPAL SUPERIOR -->
+    <header class="w-full max-w-7xl mx-auto px-4 pt-6 sticky top-0 z-40 bg-[var(--color-primary)]/90 backdrop-blur-sm pb-4">
+        <nav class="bg-[#EDD5C5] brutal-border brutal-shadow rounded-full p-3 flex justify-between items-center transition-all">
+            
+            <!-- Logotipo -->
+            <a href="#" onclick="switchTab('inicio')" class="flex items-center gap-2 pl-4 hover:scale-105 transition-transform">
+                <img src="logoTW.png" alt="Logo Takuwaku" class="h-9 md:h-10 w-auto">
             </a>
-            <div class="nav-tabs">
-                <button class="nav-btn active" id="btn-inicio" onclick="switchTab('inicio')">Inicio</button>
-                <button class="nav-btn" id="btn-about" onclick="switchTab('about')">Nosotros</button>
+
+            <!-- Pestañas -->
+            <div class="flex items-center gap-1 md:gap-3">
+                <button onclick="switchTab('inicio')" id="btn-inicio" class="nav-tab active px-3 md:px-4 py-2 rounded-full font-display font-bold text-sm md:text-base transition-all bg-[#E81E4A] text-white brutal-border-sm brutal-shadow-sm">
+                    Inicio
+                </button>
+                <button onclick="switchTab('tienda')" id="btn-tienda" class="nav-tab px-3 md:px-4 py-2 rounded-full font-display font-bold text-sm md:text-base text-[#0B1D21] hover:bg-[#0B1D21]/10 transition-all">
+                    Tienda
+                </button>
+                <button onclick="switchTab('nosotros')" id="btn-nosotros" class="nav-tab px-3 md:px-4 py-2 rounded-full font-display font-bold text-sm md:text-base text-[#0B1D21] hover:bg-[#0B1D21]/10 transition-all">
+                    Nosotros
+                </button>
+            </div>
+
+            <!-- Botón del Carrito Animado -->
+            <div class="pr-2 relative">
+                <button onclick="toggleCart()" id="cart-icon-btn" class="bg-white p-2.5 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center relative">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 md:w-6 md:h-6 text-[#0B1D21]"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-[#E81E4A] text-white font-bold text-xs w-6 h-6 rounded-full border-2 border-[#0B1D21] flex items-center justify-center hidden shadow-sm transition-transform">0</span>
+                </button>
             </div>
         </nav>
     </header>
 
-    <!-- Contenido Principal -->
-    <main>
-        
-        <!-- VISTA: INICIO (Expectativa / Próximamente) -->
-        <section class="card active" id="view-inicio">
-            <div class="brand-logo-container">
-                <!-- Logotipo de imagen oficial -->
-                <img src="logoTW.png" class="logo-img" alt="Logo Takuwaku">
+    <!-- CONTENEDOR DE SECCIONES -->
+    <main class="w-full max-w-7xl mx-auto px-4 py-4 flex-grow relative overflow-hidden">
+
+        <!-- ================= 1. PANTALLA DE INICIO ================= -->
+        <section id="section-inicio" class="view-section animate-fade-in-up">
+            <div class="bg-[#E81E4A] brutal-border brutal-shadow rounded-3xl p-8 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative min-h-[400px]">
+                <div class="absolute -right-10 -bottom-10 opacity-20 pointer-events-none hover:scale-110 transition-transform duration-700">
+                    <i data-lucide="flame" class="w-72 h-72 text-white"></i>
+                </div>
+                <div class="relative z-10 text-center md:text-left text-white w-full md:w-2/3">
+                    <span class="bg-[#ffdd57] text-[#0B1D21] text-xs font-bold px-4 py-1.5 rounded-full border-2 border-[#0B1D21] inline-block mb-4 font-display hover:-translate-y-1 transition-transform">SNACKS ASIÁTICOS ⛩️</span>
+                    <h1 class="text-4xl md:text-5xl font-bold font-display leading-tight mb-4 text-white" style="text-shadow: 3px 3px 0px #0B1D21;">¡Descubre los sabores de Asia! 🥢✨</h1>
+                    <p class="text-base md:text-lg text-white/90 max-w-xl font-semibold mb-6">
+                        Somos tu puente directo a los dulces, bebidas exóticas y ramen más populares de Japón, Corea y China. ¡Explora nuestro catálogo y pide tus antojos favoritos hoy mismo!
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                        <button onclick="switchTab('tienda')" class="bg-[#ffdd57] text-[#0B1D21] font-bold px-8 py-4 rounded-full brutal-border brutal-shadow-sm brutal-btn flex items-center justify-center gap-2 text-base">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i> Explorar Tienda
+                        </button>
+                        <a href="https://instagram.com/tienda.takuwaku" target="_blank" class="bg-white text-[#E81E4A] font-bold px-8 py-4 rounded-full brutal-border brutal-shadow-sm brutal-btn flex items-center justify-center gap-2 text-base">
+                            <i data-lucide="instagram" class="w-5 h-5"></i> Seguir en Instagram
+                        </a>
+                    </div>
+                </div>
             </div>
             
-            <h1>¡Algo muy emocionante se está cocinando! 🥢✨</h1>
-            
-            <div class="status-badge">
-                <span class="badge-dot"></span>
-                Próximamente
-            </div>
-            
-            <p class="description">
-                En <strong>Takuwaku</strong> estamos preparando los motores para ser tu puente directo a los sabores y antojos más deliciosos de Asia. Muy pronto podrás encontrar la mejor selección de snacks, bebidas exóticas y sopas instantáneas de Japón, Corea y China en un solo lugar. Actualmente <strong>no nos encontramos en operaciones comerciales</strong>, pero estamos trabajando activamente para abrir nuestras puertas virtuales muy pronto en este dominio <strong>takuwaku.shop</strong>. ⛩️📦
-            </p>
-            
-            <!-- Botón a Instagram de la Tienda -->
-            <a href="https://instagram.com/tienda.takuwaku" target="_blank" class="btn-instagram">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                ¡Sigue nuestro viaje en Instagram!
-            </a>
-        </section>
-
-        <!-- VISTA: SOBRE NOSOTROS (Misión, Propósito, Visión y Valores) -->
-        <section class="card" id="view-about">
-            
-            <!-- Misión -->
-            <h2 class="section-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                Nuestra Misión
-            </h2>
-            <p class="section-text">
-                Ofrecer una auténtica selección de snacks, bebidas y sopas enfocadas en Japón y Asia, con el propósito de hacer accesible la experiencia de disfrutar sabores difíciles de encontrar en nuestra región. Existimos para ser el puente directo que traiga la fascinante cultura asiática a nuestra comunidad, demostrando que la distancia geográfica no tiene por qué ser un obstáculo para explorar el mundo a través del paladar.
-            </p>
-
-            <!-- Propósito -->
-            <h2 class="section-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                ¿Por qué existimos?
-            </h2>
-            <p class="section-text">
-                Existimos porque creemos que la distancia geográfica no debería ser un obstáculo para explorar otras culturas. Queremos ser el puente directo que traiga la fascinante cultura asiática a nuestra comunidad a través de sus sabores, facilitando probar y consumir estos deliciosos productos de forma rápida y segura.
-            </p>
-
-            <!-- Visión -->
-            <h2 class="section-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                Nuestra Visión
-            </h2>
-            <p class="section-text">
-                Convertirnos en la primera opción de muchos para adquirir productos asiáticos (japoneses, chinos, sur coreanos, etc.), y diversificar nuestro catálogo incorporando no solo snacks o refrescos, sino también juguetes, libros (manga) y productos electrónicos de una manera directa.
-            </p>
-
-            <hr class="divider">
-
-            <!-- Valores -->
-            <h2 class="section-title" style="color: var(--color-logo);">Nuestros Valores</h2>
-            <div class="values-grid">
-                
-                <!-- Valor 1: Amabilidad -->
-                <div class="value-card">
-                    <div class="value-header">
-                        <span>🌸</span> Amabilidad
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-2xl p-6 text-center hover-float">
+                    <div class="bg-[#EDD5C5] w-14 h-14 rounded-full brutal-border-sm flex items-center justify-center mx-auto mb-4 hover:rotate-12 transition-transform">
+                        <span class="text-2xl">🍿</span>
                     </div>
-                    <div class="value-desc">Brindar siempre un trato cálido y atento a nuestros clientes.</div>
+                    <h3 class="font-display font-bold text-lg mb-2">Snacks Importados</h3>
+                    <p class="text-sm text-[#0B1D21]/70">Los dulces y botanas más virales de Japón, Corea y China.</p>
                 </div>
-
-                <!-- Valor 2: Entusiasmo -->
-                <div class="value-card">
-                    <div class="value-header">
-                        <span>⚡</span> Entusiasmo
+                <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-2xl p-6 text-center hover-float" style="animation-delay: 0.1s;">
+                    <div class="bg-[#EDD5C5] w-14 h-14 rounded-full brutal-border-sm flex items-center justify-center mx-auto mb-4 hover:rotate-12 transition-transform">
+                        <span class="text-2xl">🥤</span>
                     </div>
-                    <div class="value-desc">¡Puro espíritu Wakuwaku! Transmitimos emoción en lo que hacemos.</div>
+                    <h3 class="font-display font-bold text-lg mb-2">Bebidas Exóticas</h3>
+                    <p class="text-sm text-[#0B1D21]/70">Ramunes, refrescos de sabores únicos y leches saborizadas.</p>
                 </div>
-
-                <!-- Valor 3: Resiliencia -->
-                <div class="value-card">
-                    <div class="value-header">
-                        <span>🌱</span> Resiliencia
+                <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-2xl p-6 text-center hover-float" style="animation-delay: 0.2s;">
+                    <div class="bg-[#EDD5C5] w-14 h-14 rounded-full brutal-border-sm flex items-center justify-center mx-auto mb-4 hover:rotate-12 transition-transform">
+                        <span class="text-2xl">🍜</span>
                     </div>
-                    <div class="value-desc">Capacidad para adaptarnos y superar cualquier reto con energía.</div>
+                    <h3 class="font-display font-bold text-lg mb-2">Ramen Auténtico</h3>
+                    <p class="text-sm text-[#0B1D21]/70">El verdadero sabor de Asia listo en 3 minutos.</p>
                 </div>
-
-                <!-- Valor 4: Compromiso -->
-                <div class="value-card">
-                    <div class="value-header">
-                        <span>🤝</span> Compromiso
-                    </div>
-                    <div class="value-desc">Dedicación completa para asegurar la calidad y entrega de tus snacks.</div>
-                </div>
-
             </div>
         </section>
 
+        <!-- ================= 2. SECCIÓN DE LA TIENDA ================= -->
+        <section id="section-tienda" class="view-section hidden">
+            <!-- Barra de Búsqueda -->
+            <div class="mb-8">
+                <div class="relative w-full max-w-md mx-auto md:mx-0 group">
+                    <input type="text" id="store-search" oninput="renderStoreLayout()" placeholder="Buscar ramen, pocky, bebidas..." class="w-full bg-white text-[#0B1D21] font-semibold pl-12 pr-4 py-3.5 rounded-full brutal-border brutal-shadow-sm focus:outline-none focus:shadow-[6px_6px_0px_#0B1D21] transition-shadow text-base">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-[#0B1D21]/60 w-5 h-5 group-focus-within:text-[#E81E4A] transition-colors"></i>
+                </div>
+            </div>
+
+            <!-- Navegación Rápida -->
+            <div class="mb-8">
+                <h3 class="font-display font-bold text-xl mb-4">Explora nuestro Catálogo</h3>
+                <div class="flex gap-4 overflow-x-auto no-scrollbar snap-container pb-2" id="category-bubbles"></div>
+            </div>
+
+            <!-- Contenedor de Productos -->
+            <div id="store-content" class="flex flex-col gap-12"></div>
+        </section>
+
+        <!-- ================= 3. SECCIÓN SOBRE NOSOTROS ================= -->
+        <section id="section-nosotros" class="view-section hidden">
+            <div class="bg-[#EDD5C5] brutal-border brutal-shadow rounded-2xl p-8 max-w-3xl mx-auto flex flex-col gap-8 mb-12">
+                <div>
+                    <h2 class="text-3xl font-bold font-display text-[#078A85] mb-3 flex items-center gap-2">
+                        <i data-lucide="compass" class="w-8 h-8 hover:rotate-45 transition-transform duration-500"></i> Nuestra Misión
+                    </h2>
+                    <p class="text-base leading-relaxed text-[#0B1D21]">
+                        Ofrecer una auténtica selección de snacks, bebidas y sopas enfocadas en Japón y Asia, con el propósito de hacer accesible la experiencia de disfrutar sabores difíciles de encontrar en nuestra región. Existimos para ser el puente directo que traiga la fascinante cultura asiática a nuestra comunidad.
+                    </p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold font-display text-[#E81E4A] mb-4">Nuestros Valores</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-xl p-4 hover-float">
+                            <span class="font-display font-bold text-lg text-[#E81E4A] flex items-center gap-1">🌸 Amabilidad</span>
+                            <p class="text-xs text-[#0B1D21]/80 mt-1">Trato cálido y atento a nuestros clientes.</p>
+                        </div>
+                        <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-xl p-4 hover-float">
+                            <span class="font-display font-bold text-lg text-[#E81E4A] flex items-center gap-1">⚡ Entusiasmo</span>
+                            <p class="text-xs text-[#0B1D21]/80 mt-1">¡Puro espíritu Wakuwaku en lo que hacemos!</p>
+                        </div>
+                        <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-xl p-4 hover-float">
+                            <span class="font-display font-bold text-lg text-[#E81E4A] flex items-center gap-1">🌱 Resiliencia</span>
+                            <p class="text-xs text-[#0B1D21]/80 mt-1">Capacidad para adaptarnos y superar retos.</p>
+                        </div>
+                        <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-xl p-4 hover-float">
+                            <span class="font-display font-bold text-lg text-[#E81E4A] flex items-center gap-1">🤝 Compromiso</span>
+                            <p class="text-xs text-[#0B1D21]/80 mt-1">Dedicación completa para asegurar la calidad.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta de Contacto -->
+                <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-2xl p-6 flex flex-col justify-between gap-6 hover-float">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-[#EDD5C5] p-3.5 rounded-full brutal-border-sm shrink-0">
+                            <i data-lucide="message-circle-heart" class="w-8 h-8 text-[#E81E4A] animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display font-bold text-lg text-[#0B1D21]">¿Dudas o propuestas especiales?</h4>
+                            <p class="text-sm text-[#0B1D21]/70 mb-1">Ponte en contacto con nosotros por el medio que prefieras.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full">
+                        <a href="https://wa.me/5212471393115?text=⛩️%20¡Hola%20Takuwaku!%20Tengo%20una%20duda..." target="_blank" class="w-full bg-[#25D366] text-white font-bold px-6 py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i> WhatsApp Directo
+                        </a>
+                        <a href="mailto:hola.takuwaku@gmail.com" class="w-full bg-[#078A85] text-white font-bold px-6 py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i data-lucide="mail" class="w-5 h-5"></i> Enviar Correo
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Admin Oculto -->
+            <div class="max-w-3xl mx-auto text-center mt-12 pb-8">
+                <button onclick="switchTab('admin')" class="text-xs font-bold text-[#0B1D21]/30 hover:text-[#0B1D21] transition flex items-center justify-center mx-auto gap-1">
+                    <i data-lucide="key" class="w-3 h-3"></i> Panel Administrativo
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= 4. SECCIÓN DE ADMIN (OCULTA) ================= -->
+        <section id="section-admin" class="view-section hidden">
+
+            <!-- PANTALLA DE LOGIN (se muestra si no hay sesión de Firebase Auth) -->
+            <div id="admin-login-gate" class="max-w-sm mx-auto bg-white brutal-border brutal-shadow rounded-2xl p-8 flex flex-col gap-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="lock" class="w-6 h-6 text-[#E81E4A]"></i>
+                    <h2 class="text-xl font-bold font-display text-[#0B1D21]">Acceso Administrador</h2>
+                </div>
+                <p class="text-xs text-[#0B1D21]/60 -mt-2">Inicia sesión con tu cuenta de administrador de Firebase.</p>
+                <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="flex flex-col gap-3">
+                    <input type="email" id="admin-email" required placeholder="Correo" class="w-full bg-[#EDD5C5]/40 p-3 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                    <input type="password" id="admin-password" required placeholder="Contraseña" class="w-full bg-[#EDD5C5]/40 p-3 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                    <button type="submit" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">Entrar</button>
+                    <p id="admin-login-error" class="text-xs text-[#E81E4A] font-semibold hidden"></p>
+                </form>
+            </div>
+
+            <!-- CONTENIDO DEL PANEL (solo visible si hay sesión válida) -->
+            <div id="admin-panel-content" class="hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="bg-white brutal-border brutal-shadow rounded-2xl p-4 inline-block">
+                        <h2 class="text-2xl font-bold font-display text-[#E81E4A]">Modo Administrador</h2>
+                    </div>
+                    <button onclick="handleAdminLogout()" class="bg-white text-[#0B1D21] font-bold px-4 py-2.5 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm flex items-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+                    </button>
+                </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Columna Izquierda: Controles y Formulario (Fijo) -->
+                <div class="lg:col-span-1 flex flex-col gap-6 lg:sticky lg:top-[120px] self-start w-full">
+                    <div class="bg-[#EDD5C5] brutal-border brutal-shadow rounded-2xl p-6">
+                        <h3 class="text-xl font-bold font-display mb-4 flex items-center gap-2 text-[#078A85]">
+                            <i data-lucide="sliders" class="w-5 h-5"></i> Dashboard
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white p-3 rounded-xl brutal-border-sm brutal-shadow-sm">
+                                <span class="text-xs text-[#0B1D21]/70 block">Valor Inv.</span>
+                                <span id="stat-total-value" class="text-lg font-bold font-display text-[#078A85]">$0.00</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl brutal-border-sm brutal-shadow-sm">
+                                <span class="text-xs text-[#0B1D21]/70 block">Stock Total</span>
+                                <span id="stat-total-stock" class="text-lg font-bold font-display text-[#078A85]">0 pzs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#EDD5C5] brutal-border brutal-shadow rounded-2xl p-6 transition-all" id="admin-form-container">
+                        <h3 id="form-title" class="text-xl font-bold font-display mb-4 flex items-center gap-2 text-[#E81E4A]">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i> Nuevo Producto
+                        </h3>
+                        <form id="add-product-form" onsubmit="handleAddOrEditProduct(event)" class="flex flex-col gap-3">
+                            <input type="text" id="prod-name" required placeholder="Nombre (Ej. Pocky)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none focus:shadow-[4px_4px_0px_#0B1D21] transition-shadow">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" step="0.01" id="prod-price" required placeholder="Precio ($)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                                <input type="number" id="prod-stock" required placeholder="Stock" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="prod-category" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                    <option value="Snacks">Snacks</option>
+                                    <option value="Bebidas">Bebidas</option>
+                                    <option value="Sopas">Sopas</option>
+                                    <option value="Coleccionables">Coleccionables</option>
+                                </select>
+                                <select id="prod-img" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                    <option value="pepero">Dulce/Snack</option>
+                                    <option value="ramen">Sopa</option>
+                                    <option value="ramune">Bebida</option>
+                                    <option value="toy">Manga</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <button type="submit" id="form-submit-btn" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">
+                                    Agregar
+                                </button>
+                                <button type="button" id="form-cancel-btn" onclick="cancelEdit()" class="hidden w-1/3 bg-white text-[#0B1D21] font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 flex flex-col gap-4">
+                    <div class="bg-white brutal-border brutal-shadow rounded-2xl p-6">
+                        <h3 class="text-xl font-bold font-display flex items-center gap-2 mb-6"><i data-lucide="package" class="w-6 h-6 text-[#078A85]"></i> Inventario en Tiempo Real</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[500px]">
+                                <thead>
+                                    <tr class="border-b-2 border-[#0B1D21] text-xs font-bold uppercase">
+                                        <th class="pb-3 pl-2">Producto</th>
+                                        <th class="pb-3">Categoría</th>
+                                        <th class="pb-3">Precio</th>
+                                        <th class="pb-3 text-center">Stock</th>
+                                        <th class="pb-3 text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-inventory-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><!-- /#admin-panel-content -->
+        </section>
     </main>
 
-    <!-- Pie de Página -->
-    <footer>
-        <p>Takuwaku © 2026 | Síguenos en <a href="https://instagram.com/tienda.takuwaku" target="_blank">@tienda.takuwaku</a></p>
+    <!-- DRAWER DEL CARRITO -->
+    <div id="cart-drawer" class="fixed inset-0 bg-[#0B1D21]/40 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-[#EDD5C5] brutal-border-sm border-l-4 flex flex-col justify-between shadow-2xl transition-transform duration-300 translate-x-full" id="cart-drawer-panel">
+            
+            <div class="p-6 border-b-2 border-[#0B1D21] flex justify-between items-center bg-white shrink-0">
+                <h3 class="text-xl font-bold font-display flex items-center gap-2 text-[#0B1D21]">
+                    <i data-lucide="shopping-cart" class="w-6 h-6 text-[#E81E4A]"></i> Tu Pedido
+                </h3>
+                <button onclick="toggleCart()" class="p-1 hover:bg-[#0B1D21]/10 rounded-full transition hover:rotate-90">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 flex flex-col gap-4 no-scrollbar"></div>
+            
+            <div id="checkout-form-container" class="p-6 border-t-2 border-[#0B1D21] bg-[#EDD5C5]/50 flex flex-col gap-3 shrink-0 hidden">
+                <h4 class="font-display font-bold text-sm text-[#0B1D21] flex items-center gap-1">
+                    <i data-lucide="receipt" class="w-4 h-4 text-[#078A85]"></i> Datos de Entrega
+                </h4>
+                <input type="text" id="checkout-name" placeholder="Tu Nombre o Apodo" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none focus:shadow-[4px_4px_0px_#0B1D21] transition-shadow placeholder:font-normal">
+                <div class="flex gap-2">
+                    <select id="checkout-delivery" class="w-1/2 bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-bold focus:outline-none text-[#0B1D21]">
+                        <option value="En Escuela">📍 En Escuela</option>
+                        <option value="A Domicilio">🛵 A Domicilio</option>
+                    </select>
+                    <select id="checkout-payment" class="w-1/2 bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-bold focus:outline-none text-[#0B1D21]">
+                        <option value="Efectivo">💵 Efectivo</option>
+                        <option value="Transferencia">💳 Transferencia</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-6 border-t-2 border-[#0B1D21] bg-white flex flex-col gap-4 shrink-0">
+                <div class="flex justify-between items-center font-display text-lg font-bold">
+                    <span>Total a Pagar:</span>
+                    <span id="cart-total-amount" class="text-[#E81E4A] text-2xl">$0.00</span>
+                </div>
+                <button onclick="handleCheckout()" id="btn-checkout" class="w-full bg-[#E81E4A] text-white font-bold py-4 rounded-full brutal-border brutal-shadow-sm brutal-btn flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-5 h-5"></i> Confirmar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full text-center py-6 border-t-2 border-[#0B1D21]/20 mt-8 bg-[#0B1D21]/5 px-4 mb-20 md:mb-8">
+        <p class="font-display text-xs md:text-sm text-[#0B1D21]/70 leading-relaxed">
+            Takuwaku © 2026 | Novedades en <a href="https://instagram.com/tienda.takuwaku" target="_blank" class="text-[#E81E4A] font-bold hover:underline transition-colors">@tienda.takuwaku</a>
+        </p>
     </footer>
 
-    <!-- Lógica JavaScript para la SPA -->
-    <script>
-        function switchTab(tabName) {
-            const viewInicio = document.getElementById('view-inicio');
-            const viewAbout = document.getElementById('view-about');
-            const btnInicio = document.getElementById('btn-inicio');
-            const btnAbout = document.getElementById('btn-about');
+    <!-- ================= FIREBASE (Firestore + Auth) ================= -->
+    <!--
+        1) Crea un proyecto en https://console.firebase.google.com
+        2) Activa "Firestore Database" (modo producción) y "Authentication" > método Correo/Contraseña.
+        3) Crea manualmente UN usuario admin en Authentication > Users (ese correo/contraseña es tu login del panel).
+        4) Copia tu configuración web (Configuración del proyecto > tus apps > SDK config) y pégala abajo en firebaseConfig.
+        5) En Firestore > Reglas, pega las reglas de seguridad que te compartí aparte (productos: lectura pública,
+           escritura solo admin autenticado; pedidos: creación pública, lectura solo admin).
+    -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getFirestore, collection, doc, getDocs, setDoc, deleteDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-            if (tabName === 'inicio') {
-                viewInicio.classList.add('active');
-                viewAbout.classList.remove('active');
-                btnInicio.classList.add('active');
-                btnAbout.classList.remove('active');
-            } else if (tabName === 'about') {
-                viewAbout.classList.add('active');
-                viewInicio.classList.remove('active');
-                btnAbout.classList.add('active');
-                btnInicio.classList.remove('active');
+        // 🔧 Configuración del proyecto Firebase "takuwaku-e5d77"
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiqeVvJu42SQG7mkC9YlFF4haHPlTDV8A",
+            authDomain: "takuwaku-e5d77.firebaseapp.com",
+            projectId: "takuwaku-e5d77",
+            storageBucket: "takuwaku-e5d77.firebasestorage.app",
+            messagingSenderId: "583361940669",
+            appId: "1:583361940669:web:4d5f9f2eec7a7fd5503bd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Se expone todo lo necesario en window para que el script clásico (abajo) lo use.
+        window.fb = {
+            db, auth, collection, doc, getDocs, setDoc, deleteDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp,
+            signInWithEmailAndPassword, onAuthStateChanged, signOut
+        };
+
+        // Avisa al resto de la app que Firebase ya está listo para usarse.
+        window.dispatchEvent(new Event('fb-ready'));
+    </script>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        const imagePresets = {
+            ramen: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><path d="M20 50C20 65 30 75 50 75C70 75 80 65 80 50H20Z" fill="#E81E4A" stroke="#0B1D21" stroke-width="4"/><path d="M15 35L45 52M85 35L40 52" stroke="#0B1D21" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="62" r="4" fill="#0B1D21"/><circle cx="35" cy="58" r="4" fill="#078A85"/></svg>`,
+            ramune: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><rect x="42" y="20" width="16" height="55" rx="8" fill="#68BAAB" stroke="#0B1D21" stroke-width="4"/><rect x="45" y="12" width="10" height="8" rx="2" fill="#E81E4A" stroke="#0B1D21" stroke-width="3"/><circle cx="50" cy="45" r="5" fill="#ffffff" opacity="0.8"/></svg>`,
+            pepero: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><rect x="25" y="20" width="50" height="60" rx="6" fill="#078A85" stroke="#0B1D21" stroke-width="4"/><line x1="38" y1="40" x2="38" y2="70" stroke="#E81E4A" stroke-width="6" stroke-linecap="round"/><line x1="50" y1="35" x2="50" y2="65" stroke="#0B1D21" stroke-width="6" stroke-linecap="round"/><line x1="62" y1="40" x2="62" y2="70" stroke="#ffdd57" stroke-width="6" stroke-linecap="round"/></svg>`,
+            toy: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><rect x="30" y="25" width="40" height="50" rx="4" fill="#ffffff" stroke="#0B1D21" stroke-width="4"/><path d="M35 30H65V45H35V30Z" fill="#ffdd57" stroke="#0B1D21" stroke-width="3"/><circle cx="50" cy="60" r="6" fill="#E81E4A"/></svg>`
+        };
+
+        const defaultProducts = [
+            { id: "p1", name: "Ramen Samyang Carbonara", price: 55.00, category: "Sopas", stock: 15, preset: "ramen" },
+            { id: "p2", name: "Bebida Ramune Melón", price: 65.00, category: "Bebidas", stock: 8, preset: "ramune" },
+            { id: "p3", name: "Pepero Chocolate Almond", price: 42.00, category: "Snacks", stock: 22, preset: "pepero" },
+            { id: "p4", name: "Pocky Fresa Matcha", price: 45.00, category: "Snacks", stock: 12, preset: "pepero" },
+            { id: "p5", name: "Lata Chupa Chups Uva", price: 48.00, category: "Bebidas", stock: 12, preset: "ramune" },
+            { id: "p6", name: "Manga Shingeki no Kyojin", price: 149.00, category: "Coleccionables", stock: 3, preset: "toy" }
+        ];
+
+        let products = [];
+        let cart = {};
+        const WHATSAPP_NUMBER = "5212471393115"; 
+        let editingProductId = null;
+        let isAdmin = false;
+        let productsUnsub = null; // para poder cancelar el listener de Firestore si hiciera falta
+
+        // Arranca la app solo cuando Firebase ya está inicializado (ver script type="module" arriba)
+        function bootApp() {
+            const { db, auth, onAuthStateChanged } = window.fb;
+
+            // Escucha en tiempo real la colección "products": cualquier cambio hecho desde
+            // el panel admin (o desde otro dispositivo) se refleja al instante para todos.
+            listenToProducts();
+
+            // Escucha el estado de sesión del admin
+            onAuthStateChanged(auth, (user) => {
+                isAdmin = !!user;
+                const gate = document.getElementById('admin-login-gate');
+                const panel = document.getElementById('admin-panel-content');
+                if (isAdmin) {
+                    gate.classList.add('hidden');
+                    panel.classList.remove('hidden');
+                    renderAdminInventory();
+                } else {
+                    gate.classList.remove('hidden');
+                    panel.classList.add('hidden');
+                }
+            });
+
+            switchTab('inicio');
+            updateCartUI();
+            lucide.createIcons();
+        }
+
+        if (window.fb) {
+            bootApp();
+        } else {
+            window.addEventListener('fb-ready', bootApp, { once: true });
+        }
+
+        // Sincroniza "products" en vivo desde Firestore. Si la colección está vacía
+        // (primera vez que se usa el proyecto), la siembra con defaultProducts.
+        async function listenToProducts() {
+            const { db, collection, getDocs, setDoc, doc, onSnapshot } = window.fb;
+            const productsRef = collection(db, 'products');
+
+            const snapshotOnce = await getDocs(productsRef);
+            if (snapshotOnce.empty) {
+                for (const p of defaultProducts) {
+                    const { id, ...data } = p;
+                    await setDoc(doc(db, 'products', id), data);
+                }
+            }
+
+            if (productsUnsub) productsUnsub();
+            productsUnsub = onSnapshot(productsRef, (snapshot) => {
+                products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderStoreLayout();
+                if (isAdmin) renderAdminInventory();
+            }, (err) => {
+                console.error('Firestore onSnapshot error:', err);
+                showToast('No se pudo conectar con la base de datos', 'error');
+            });
+        }
+
+        // ================= AUTENTICACIÓN DE ADMIN =================
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const { auth, signInWithEmailAndPassword } = window.fb;
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const errorEl = document.getElementById('admin-login-error');
+            errorEl.classList.add('hidden');
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    document.getElementById('admin-login-form').reset();
+                })
+                .catch((err) => {
+                    errorEl.innerText = "Correo o contraseña incorrectos.";
+                    errorEl.classList.remove('hidden');
+                    console.error(err);
+                });
+        }
+
+        function handleAdminLogout() {
+            const { auth, signOut } = window.fb;
+            signOut(auth);
+            switchTab('nosotros');
+        }
+
+        // --- SISTEMA DE NOTIFICACIONES TOAST ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl brutal-border-sm brutal-shadow-sm font-display font-bold text-sm bg-white flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.style.borderColor = type === 'success' ? '#078A85' : '#E81E4A';
+            const icon = type === 'success' ? 'check-circle' : 'alert-triangle';
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 ${type === 'success' ? 'text-[#078A85]' : 'text-[#E81E4A]'}"></i> ${message}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // --- ANIMACIÓN DEL CARRITO ---
+        function animateCartIcon() {
+            const cartBtn = document.getElementById('cart-icon-btn');
+            cartBtn.classList.remove('animate-cart-bump');
+            void cartBtn.offsetWidth; // Reflow para reiniciar la animación CSS
+            cartBtn.classList.add('animate-cart-bump');
+        }
+
+        // --- NAVEGACIÓN Y ANIMACIÓN DE VISTAS ---
+        function switchTab(tabId) {
+            // Ocultar todas
+            document.querySelectorAll('.view-section').forEach(s => {
+                s.classList.add('hidden');
+                s.classList.remove('animate-fade-in-up'); // Limpiar animación previa
+            });
+            
+            // Mostrar la seleccionada y aplicar animación Fade In Up
+            const activeSection = document.getElementById(`section-${tabId}`);
+            activeSection.classList.remove('hidden');
+            void activeSection.offsetWidth; // Reflow
+            activeSection.classList.add('animate-fade-in-up');
+
+            // Colores de los botones del Navbar
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.className = "nav-tab px-3 md:px-4 py-2 rounded-full font-display font-bold text-sm md:text-base text-[#0B1D21] hover:bg-[#0B1D21]/5 transition-all";
+            });
+            
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if(activeBtn) {
+                activeBtn.className = "nav-tab active px-3 md:px-4 py-2 rounded-full font-display font-bold text-sm md:text-base transition-all bg-[#E81E4A] text-white brutal-border-sm brutal-shadow-sm scale-105";
+            }
+
+            if (tabId === 'admin' && isAdmin) renderAdminInventory();
+            if (tabId === 'tienda') renderStoreLayout();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        // ================= RENDERIZADO DE TIENDA DINÁMICA (CON ANIMACIONES) =================
+        function renderStoreLayout() {
+            const content = document.getElementById('store-content');
+            const bubbles = document.getElementById('category-bubbles');
+            content.innerHTML = '';
+            bubbles.innerHTML = '';
+
+            const searchQuery = document.getElementById('store-search').value.toLowerCase();
+            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery));
+            
+            const categories = [...new Set(filteredProducts.map(p => p.category))];
+            const catIcons = { "Snacks": "🍿", "Bebidas": "🥤", "Sopas": "🍜", "Coleccionables": "🎨" };
+
+            if(filteredProducts.length === 0) {
+                content.innerHTML = `
+                    <div class="bg-[#EDD5C5]/50 border-2 border-dashed border-[#0B1D21]/30 rounded-2xl p-12 text-center animate-fade-in-up">
+                        <p class="font-display font-bold text-lg text-[#0B1D21]/70">No encontramos productos con esa búsqueda</p>
+                    </div>`;
+                return;
+            }
+
+            categories.forEach(cat => {
+                const bubble = document.createElement('a');
+                bubble.href = `#cat-${cat}`;
+                bubble.className = "snap-item bg-white brutal-border-sm brutal-shadow-sm rounded-full px-5 py-3 flex items-center gap-2 shrink-0 font-display font-bold text-sm text-[#0B1D21] hover:bg-[#EDD5C5] transition-colors";
+                bubble.innerHTML = `<span>${catIcons[cat] || '⭐'}</span> ${cat}`;
+                bubbles.appendChild(bubble);
+            });
+
+            categories.forEach((cat, catIndex) => {
+                const catProducts = filteredProducts.filter(p => p.category === cat);
+                if(catProducts.length === 0) return;
+
+                let delayCounter = 0; // Para escalar la aparición de los productos
+
+                const cardsHTML = catProducts.map((p) => {
+                    const inCartQty = cart[p.id] || 0;
+                    const availableStock = p.stock - inCartQty;
+                    let badgeHTML = '';
+                    let disableBtn = false;
+
+                    if (availableStock <= 0) {
+                        badgeHTML = `<span class="absolute top-3 left-3 bg-[#E81E4A] text-white border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full z-10 shadow-sm">Agotado</span>`;
+                        disableBtn = true;
+                    } else if (availableStock <= 3) {
+                        badgeHTML = `<span class="absolute top-3 left-3 bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full z-10 shadow-sm animate-pulse">¡Últimas ${availableStock}!</span>`;
+                    }
+
+                    // Se agrega la clase animate-pop-in y un retraso dinámico
+                    const delay = (delayCounter * 0.08); 
+                    delayCounter++;
+
+                    return `
+                    <div class="snap-item w-[200px] md:w-[240px] shrink-0 bg-white brutal-border brutal-shadow-sm rounded-2xl p-4 flex flex-col justify-between relative hover-float animate-pop-in" style="animation-delay: ${delay}s">
+                        ${badgeHTML}
+                        <div class="w-full aspect-square rounded-xl overflow-hidden brutal-border-sm mb-4 bg-[#EDD5C5]/30 group">
+                            <div class="w-full h-full transition-transform duration-300 group-hover:scale-110">
+                                ${imagePresets[p.preset] || imagePresets.pepero}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-[#078A85] uppercase tracking-wider">${p.category}</span>
+                            <h4 class="font-display font-bold text-sm md:text-base text-[#0B1D21] line-clamp-2 mt-1 min-h-[2.5rem] md:min-h-[3rem] leading-tight">${p.name}</h4>
+                        </div>
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-[#0B1D21]/10">
+                            <span class="font-display font-black text-base md:text-lg text-[#0B1D21]">$${p.price.toFixed(2)}</span>
+                            <button onclick="addToCart('${p.id}')" ${disableBtn ? 'disabled' : ''} class="bg-[#E81E4A] text-white p-2 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center ${disableBtn ? 'opacity-40 cursor-not-allowed shadow-none' : ''}">
+                                <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                content.innerHTML += `
+                    <div id="cat-${cat}" class="scroll-mt-32">
+                        <h3 class="font-display font-bold text-2xl text-[#0B1D21] mb-4 flex items-center gap-2">
+                            ${catIcons[cat] || '⭐'} ${cat}
+                        </h3>
+                        <div class="flex gap-4 overflow-x-auto snap-container pb-8 px-2 -mx-2 no-scrollbar">
+                            ${cardsHTML}
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        // ================= CARRITO DE COMPRAS =================
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const panel = document.getElementById('cart-drawer-panel');
+            if (drawer.classList.contains('pointer-events-none')) {
+                drawer.classList.remove('pointer-events-none', 'opacity-0');
+                panel.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('pointer-events-none', 'opacity-0');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            const currentQty = cart[productId] || 0;
+            if (currentQty < product.stock) {
+                cart[productId] = currentQty + 1;
+                showToast(`Agregado: ${product.name}`);
+                animateCartIcon(); 
+                updateCartUI();
+                renderStoreLayout();
+            }
+        }
+
+        function changeCartQty(productId, amount) {
+            const product = products.find(p => p.id === productId);
+            const newQty = (cart[productId] || 0) + amount;
+            if (newQty <= 0) delete cart[productId];
+            else if (newQty <= product.stock) cart[productId] = newQty;
+            
+            updateCartUI();
+            renderStoreLayout();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const countBadge = document.getElementById('cart-count');
+            const totalLabel = document.getElementById('cart-total-amount');
+            const formContainer = document.getElementById('checkout-form-container');
+            const btnCheckout = document.getElementById('btn-checkout');
+            
+            container.innerHTML = '';
+            
+            let totalCount = 0; let totalPrice = 0;
+            const cartKeys = Object.keys(cart);
+
+            if (cartKeys.length === 0) {
+                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-center opacity-60"><i data-lucide="shopping-cart" class="w-12 h-12 mb-3"></i><p class="font-display font-bold">Carrito vacío</p></div>`;
+                countBadge.classList.add('hidden');
+                totalLabel.innerText = "$0.00";
+                formContainer.classList.add('hidden');
+                btnCheckout.disabled = true;
+                btnCheckout.classList.add('opacity-50', 'cursor-not-allowed');
+                lucide.createIcons(); 
+                return;
+            }
+
+            formContainer.classList.remove('hidden');
+            btnCheckout.disabled = false;
+            btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            cartKeys.forEach(productId => {
+                const p = products.find(p => p.id === productId);
+                const qty = cart[productId];
+                totalCount += qty; totalPrice += p.price * qty;
+
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl brutal-border-sm brutal-shadow-sm flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-lg overflow-hidden brutal-border-sm shrink-0 bg-[#EDD5C5]/30">
+                            ${imagePresets[p.preset]}
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <h5 class="font-display font-bold text-sm text-[#0B1D21] truncate">${p.name}</h5>
+                            <p class="text-xs text-[#078A85] font-semibold">$${(p.price * qty).toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeCartQty('${productId}', -1)" class="w-6 h-6 bg-[#EDD5C5]/50 rounded-full brutal-border-sm flex items-center justify-center font-bold text-sm hover:bg-[#E81E4A] hover:text-white transition-colors">-</button>
+                            <span class="font-display font-bold text-sm w-3 text-center">${qty}</span>
+                            <button onclick="changeCartQty('${productId}', 1)" class="w-6 h-6 bg-[#EDD5C5]/50 rounded-full brutal-border-sm flex items-center justify-center font-bold text-sm hover:bg-[#078A85] hover:text-white transition-colors">+</button>
+                        </div>
+                    </div>`;
+            });
+            countBadge.innerText = totalCount;
+            countBadge.classList.remove('hidden');
+            // Re-animar contador
+            countBadge.classList.add('animate-cart-bump');
+            setTimeout(() => countBadge.classList.remove('animate-cart-bump'), 500);
+
+            totalLabel.innerText = `$${totalPrice.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        async function handleCheckout() {
+            if (Object.keys(cart).length === 0) return;
+            
+            const customerName = document.getElementById('checkout-name').value.trim();
+            const deliveryMethod = document.getElementById('checkout-delivery').value;
+            const paymentMethod = document.getElementById('checkout-payment').value;
+
+            if(!customerName) {
+                showToast("Por favor ingresa tu nombre", "error");
+                document.getElementById('checkout-name').focus();
+                return;
+            }
+
+            const btnCheckout = document.getElementById('btn-checkout');
+            btnCheckout.disabled = true;
+            btnCheckout.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const { db, doc, runTransaction, collection, addDoc, serverTimestamp } = window.fb;
+            const orderItems = Object.keys(cart).map(id => {
+                const p = products.find(p => p.id === id);
+                return { productId: id, name: p.name, price: p.price, qty: cart[id], subtotal: p.price * cart[id] };
+            });
+            const total = orderItems.reduce((acc, it) => acc + it.subtotal, 0);
+
+            try {
+                // Transacción: valida y descuenta stock real en Firestore para evitar
+                // que dos clientes compren la última pieza al mismo tiempo.
+                await runTransaction(db, async (tx) => {
+                    for (const item of orderItems) {
+                        const ref = doc(db, 'products', item.productId);
+                        const snap = await tx.get(ref);
+                        if (!snap.exists()) throw new Error(`Producto no encontrado: ${item.name}`);
+                        const currentStock = snap.data().stock;
+                        if (currentStock < item.qty) throw new Error(`Ya no hay suficiente stock de ${item.name}`);
+                        tx.update(ref, { stock: currentStock - item.qty });
+                    }
+                });
+
+                // Guarda el pedido para que quede un historial y no dependa solo de WhatsApp
+                await addDoc(collection(db, 'orders'), {
+                    customerName, deliveryMethod, paymentMethod,
+                    items: orderItems, total,
+                    createdAt: serverTimestamp(),
+                    status: 'pendiente'
+                });
+
+                let message = `⛩️ *¡Hola Takuwaku!* Soy *${customerName}* y quiero hacer este pedido:\n\n`;
+                message += `📦 *Mi Pedido:*\n`;
+                orderItems.forEach(it => {
+                    message += `▪️ ${it.qty}x _${it.name}_ -> *$${it.subtotal.toFixed(2)}*\n`;
+                });
+                message += `\n🚚 *Entrega:* ${deliveryMethod}\n`;
+                message += `💵 *Pago:* ${paymentMethod}\n`;
+                message += `\n💰 *Total a Pagar:* *$${total.toFixed(2)} MXN*`;
+
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+
+                cart = {};
+                document.getElementById('checkout-name').value = '';
+                updateCartUI();
+                toggleCart();
+                showToast("¡Pedido registrado! Redirigiendo a WhatsApp...");
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || "No se pudo completar el pedido, intenta de nuevo", "error");
+            } finally {
+                btnCheckout.disabled = false;
+                btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // ================= ADMIN PANEL MEJORADO (CRUD) =================
+        function renderAdminInventory() {
+            const table = document.getElementById('admin-inventory-table');
+            table.innerHTML = '';
+            
+            products.forEach(p => {
+                table.innerHTML += `
+                    <tr class="border-b border-[#0B1D21]/10 text-sm hover:bg-[#EDD5C5]/20 transition-colors">
+                        <td class="py-3 pl-2 font-display font-semibold">${p.name}</td>
+                        <td class="py-3 text-xs text-[#078A85]">${p.category}</td>
+                        <td class="py-3 font-bold">$${p.price.toFixed(2)}</td>
+                        <td class="py-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="adjustAdminStock('${p.id}', -1)" class="w-6 h-6 bg-[#EDD5C5] rounded brutal-border-sm text-xs font-bold hover:bg-[#E81E4A] hover:text-white transition-colors">-</button>
+                                <span class="${p.stock <= 3 ? 'text-[#E81E4A] font-bold' : ''}">${p.stock}</span>
+                                <button onclick="adjustAdminStock('${p.id}', 1)" class="w-6 h-6 bg-[#EDD5C5] rounded brutal-border-sm text-xs font-bold hover:bg-[#078A85] hover:text-white transition-colors">+</button>
+                            </div>
+                        </td>
+                        <td class="py-3 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button onclick="editProduct('${p.id}')" title="Editar Producto" class="text-[#078A85] p-2 rounded hover:bg-[#078A85]/10 transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                <button onclick="deleteProduct('${p.id}')" title="Eliminar Producto" class="text-[#E81E4A] p-2 rounded hover:bg-[#E81E4A]/10 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+            
+            const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
+            const totalStock = products.reduce((acc, p) => acc + p.stock, 0);
+            document.getElementById('stat-total-value').innerText = `$${totalValue.toLocaleString('es-MX', {minimumFractionDigits:2})}`;
+            document.getElementById('stat-total-stock').innerText = `${totalStock} pzs`;
+            lucide.createIcons();
+        }
+
+        async function adjustAdminStock(id, amt) {
+            if (!isAdmin) return;
+            const p = products.find(p => p.id === id);
+            if (!p || p.stock + amt < 0) return;
+            const { db, doc, setDoc } = window.fb;
+            const { id: _omit, ...rest } = p;
+            try {
+                await setDoc(doc(db, 'products', id), { ...rest, stock: p.stock + amt }, { merge: true });
+                // El onSnapshot en tiempo real actualizará "products" y volverá a pintar la tabla.
+            } catch (err) {
+                console.error(err);
+                showToast("No se pudo actualizar el stock", "error");
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!isAdmin) return;
+            if(confirm("¿Estás seguro de eliminar este producto por completo?")) {
+                const { db, doc, deleteDoc } = window.fb;
+                try {
+                    await deleteDoc(doc(db, 'products', id));
+                    delete cart[id];
+                    if(editingProductId === id) cancelEdit();
+                    showToast("Producto Eliminado", "error");
+                } catch (err) {
+                    console.error(err);
+                    showToast("No se pudo eliminar el producto", "error");
+                }
+            }
+        }
+
+        // ================= EDICIÓN DE PRODUCTOS =================
+        function editProduct(id) {
+            const p = products.find(p => p.id === id);
+            if (!p) return;
+            
+            editingProductId = id;
+            
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-stock').value = p.stock;
+            document.getElementById('prod-category').value = p.category;
+            document.getElementById('prod-img').value = p.preset;
+
+            document.getElementById('form-title').innerHTML = `<i data-lucide="edit-3" class="w-5 h-5"></i> Editar Producto`;
+            document.getElementById('form-submit-btn').innerText = "Guardar Cambios";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+            
+            document.getElementById('admin-form-container').scrollIntoView({behavior: 'smooth', block: 'start'});
+            lucide.createIcons();
+        }
+
+        function cancelEdit() {
+            editingProductId = null;
+            document.getElementById('add-product-form').reset();
+            
+            document.getElementById('form-title').innerHTML = `<i data-lucide="plus-circle" class="w-5 h-5"></i> Nuevo Producto`;
+            document.getElementById('form-submit-btn').innerText = "Agregar";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        async function handleAddOrEditProduct(e) {
+            e.preventDefault();
+            if (!isAdmin) return;
+
+            const name = document.getElementById('prod-name').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const category = document.getElementById('prod-category').value;
+            const preset = document.getElementById('prod-img').value;
+
+            if (isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+                showToast("Ingresa valores numéricos válidos", "error");
+                return;
+            }
+
+            const { db, doc, setDoc } = window.fb;
+            const id = editingProductId || ('prod_' + Date.now());
+
+            try {
+                await setDoc(doc(db, 'products', id), { name, price, stock, category, preset });
+                showToast(editingProductId ? "¡Cambios guardados con éxito!" : "¡Nuevo Producto Agregado!");
+                cancelEdit();
+                // El onSnapshot en tiempo real refresca "products" y la tabla automáticamente.
+            } catch (err) {
+                console.error(err);
+                showToast("No se pudo guardar el producto", "error");
             }
         }
     </script>
 </body>
 </html>
-
