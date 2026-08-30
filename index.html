@@ -150,6 +150,7 @@
 
             <!-- Ofertas Destacadas (solo aparece si hay productos en oferta) -->
             <div id="home-ofertas-section" class="hidden mb-8"></div>
+            <div id="home-coming-soon-section" class="hidden mb-8"></div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-2xl p-6 text-center hover-float">
@@ -258,7 +259,7 @@
             </div>
         </section>
 
-        <!-- ================= 4. SECCIÓN DE ADMIN (OCULTA) ================= -->
+        <!-- ================= 5. SECCIÓN DE ADMIN (OCULTA) ================= -->
         <section id="section-admin" class="view-section hidden">
 
             <!-- PANTALLA DE LOGIN (se muestra si no hay sesión de Firebase Auth) -->
@@ -331,6 +332,12 @@
                                     <option value="toy">Ícono: Manga</option>
                                 </select>
                             </div>
+                            <textarea id="prod-description" rows="2" placeholder="Descripción corta (opcional)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none resize-none"></textarea>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="prod-weight" placeholder="Peso/Presentación (Ej. 40g)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                <input type="text" id="prod-origin" placeholder="País de origen" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                            </div>
+                            <input type="text" id="prod-allergens" placeholder="Alérgenos (Ej. Contiene soya, gluten)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
                             <div class="bg-white p-3 rounded-lg brutal-border-sm">
                                 <label class="text-xs font-bold text-[#0B1D21]/70 block mb-2">Foto real del producto (opcional, reemplaza el ícono)</label>
                                 <input type="text" id="prod-image-url" placeholder="Pega un link de imagen (https://...)" class="w-full bg-[#EDD5C5]/30 p-2 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none mb-2">
@@ -341,6 +348,10 @@
                                     <button type="button" onclick="removeProductImage()" class="text-xs font-bold text-[#E81E4A]">Quitar foto</button>
                                 </div>
                             </div>
+                            <label class="bg-[#EDD5C5]/40 p-3 rounded-lg brutal-border-sm flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="prod-coming-soon" class="w-4 h-4 accent-[#E81E4A]">
+                                <span class="text-xs font-bold text-[#0B1D21]/80">🔜 Próximamente (aún no disponible para la venta)</span>
+                            </label>
                             <div class="flex gap-2 mt-2">
                                 <button type="submit" id="form-submit-btn" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">
                                     Agregar
@@ -354,9 +365,10 @@
                 </div>
 
                 <div class="lg:col-span-2 flex flex-col gap-4">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 flex-wrap">
                         <button onclick="switchAdminSubtab('inventario')" id="admin-subtab-inventario" class="admin-subtab bg-[#E81E4A] text-white font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm">Inventario</button>
                         <button onclick="switchAdminSubtab('pedidos')" id="admin-subtab-pedidos" class="admin-subtab bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm">Pedidos</button>
+                        <button onclick="switchAdminSubtab('cupones')" id="admin-subtab-cupones" class="admin-subtab bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm">Cupones</button>
                     </div>
 
                     <div id="admin-view-inventario" class="bg-white brutal-border brutal-shadow rounded-2xl p-6">
@@ -381,6 +393,36 @@
                         <h3 class="text-xl font-bold font-display flex items-center gap-2 mb-6"><i data-lucide="receipt" class="w-6 h-6 text-[#078A85]"></i> Historial de Pedidos</h3>
                         <div id="admin-orders-list" class="flex flex-col gap-3"></div>
                     </div>
+
+                    <div id="admin-view-cupones" class="hidden flex flex-col gap-6">
+                        <div class="bg-[#EDD5C5] brutal-border brutal-shadow rounded-2xl p-6">
+                            <h3 class="text-xl font-bold font-display mb-4 flex items-center gap-2 text-[#E81E4A]"><i data-lucide="ticket" class="w-5 h-5"></i> Nuevo Cupón</h3>
+                            <form id="add-coupon-form" onsubmit="handleAddCoupon(event)" class="flex flex-col gap-3">
+                                <input type="text" id="coupon-code" required placeholder="Código (Ej. VERANO10)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none uppercase">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <select id="coupon-type" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                        <option value="percent">Descuento %</option>
+                                        <option value="fixed">Descuento $ fijo</option>
+                                    </select>
+                                    <input type="number" step="0.01" id="coupon-value" required placeholder="Valor" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.01" id="coupon-min-order" placeholder="Compra mínima (opcional)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                    <input type="number" id="coupon-max-uses" placeholder="Usos máximos (opcional)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-[#0B1D21]/70 block mb-1">Fecha de expiración (opcional)</label>
+                                    <input type="date" id="coupon-expires" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                                </div>
+                                <button type="submit" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm mt-1">Crear Cupón</button>
+                            </form>
+                        </div>
+
+                        <div class="bg-white brutal-border brutal-shadow rounded-2xl p-6">
+                            <h3 class="text-xl font-bold font-display flex items-center gap-2 mb-6"><i data-lucide="tags" class="w-6 h-6 text-[#078A85]"></i> Cupones Activos</h3>
+                            <div id="admin-coupons-list" class="flex flex-col gap-3"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             </div><!-- /#admin-panel-content -->
@@ -401,7 +443,7 @@
             </div>
             
             <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 flex flex-col gap-4 no-scrollbar"></div>
-            
+
             <div id="checkout-form-container" class="p-6 border-t-2 border-[#0B1D21] bg-[#EDD5C5]/50 flex flex-col gap-3 shrink-0 hidden">
                 <h4 class="font-display font-bold text-sm text-[#0B1D21] flex items-center gap-1">
                     <i data-lucide="receipt" class="w-4 h-4 text-[#078A85]"></i> Datos de Entrega
@@ -419,13 +461,55 @@
                 </div>
             </div>
 
-            <div class="p-6 border-t-2 border-[#0B1D21] bg-white flex flex-col gap-4 shrink-0">
+            <div class="p-6 border-t-2 border-[#0B1D21] bg-white flex flex-col gap-2 shrink-0">
+                <!-- Cupón: enlace discreto que se expande solo si el cliente lo necesita -->
+                <div id="coupon-section" class="mb-1">
+                    <button id="coupon-toggle-btn" onclick="toggleCouponBox()" type="button" class="text-xs font-bold text-[#078A85] flex items-center gap-1.5 hover:underline">
+                        <i data-lucide="ticket" class="w-3.5 h-3.5"></i> ¿Tienes un cupón?
+                    </button>
+                    <div id="coupon-input-wrap" class="hidden gap-2 mt-2">
+                        <input type="text" id="coupon-code-input" placeholder="Código de cupón" class="flex-grow bg-[#EDD5C5]/30 p-2 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none uppercase">
+                        <button onclick="applyCoupon()" type="button" class="bg-[#078A85] text-white font-bold px-4 rounded-lg brutal-border-sm text-sm shrink-0">Aplicar</button>
+                    </div>
+                    <div id="coupon-applied-chip" class="hidden bg-[#078A85]/10 border-2 border-[#078A85] rounded-lg px-3 py-1.5 mt-2 flex items-center justify-between text-sm">
+                        <span class="font-bold text-[#078A85]">🎟️ <span id="coupon-applied-label"></span></span>
+                        <button onclick="removeCoupon()" type="button" class="text-[#E81E4A] font-bold text-xs">Quitar</button>
+                    </div>
+                    <p id="coupon-message" class="text-xs font-semibold mt-1.5 hidden"></p>
+                </div>
+
+                <div id="cart-breakdown" class="hidden flex flex-col gap-1 text-sm text-[#0B1D21]/70 pb-2 border-b border-dashed border-[#0B1D21]/20 mb-1">
+                    <div class="flex justify-between"><span>Subtotal:</span><span id="cart-subtotal-amount">$0.00</span></div>
+                    <div class="flex justify-between text-[#078A85] font-semibold"><span id="cart-discount-label">Descuento:</span><span id="cart-discount-amount">-$0.00</span></div>
+                </div>
                 <div class="flex justify-between items-center font-display text-lg font-bold">
                     <span>Total a Pagar:</span>
                     <span id="cart-total-amount" class="text-[#E81E4A] text-2xl">$0.00</span>
                 </div>
                 <button onclick="handleCheckout()" id="btn-checkout" class="w-full bg-[#E81E4A] text-white font-bold py-4 rounded-full brutal-border brutal-shadow-sm brutal-btn flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-5 h-5"></i> Confirmar Pedido
+                </button>
+                <p class="text-[10px] text-center text-[#0B1D21]/40">Al confirmar, aceptas nuestros <a href="terminos.html" target="_blank" class="underline font-semibold">Términos y Condiciones</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLE DE PRODUCTO -->
+    <div id="product-detail-modal" class="fixed inset-0 bg-[#0B1D21]/60 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white brutal-border brutal-shadow rounded-3xl w-full max-w-sm max-h-[90vh] overflow-y-auto no-scrollbar relative">
+            <button onclick="closeProductDetail()" class="absolute top-3 right-3 bg-white p-1.5 rounded-full brutal-border-sm z-10 hover:rotate-90 transition-transform">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="detail-image-wrap" class="w-full aspect-square bg-[#EDD5C5]/30"></div>
+            <div class="p-5 flex flex-col gap-3">
+                <div id="detail-badges" class="flex gap-2 flex-wrap"></div>
+                <span id="detail-category" class="text-xs font-bold text-[#078A85] uppercase tracking-wider"></span>
+                <h3 id="detail-name" class="font-display font-bold text-xl text-[#0B1D21] leading-tight"></h3>
+                <div id="detail-price" class="flex items-baseline gap-2"></div>
+                <p id="detail-description" class="text-sm text-[#0B1D21]/80"></p>
+                <div id="detail-specs" class="flex flex-col gap-1.5 text-xs text-[#0B1D21]/70 bg-[#EDD5C5]/30 rounded-xl p-3"></div>
+                <button id="detail-add-btn" class="w-full bg-[#E81E4A] text-white font-bold py-3.5 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center gap-2 text-sm mt-2">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i> Agregar al carrito
                 </button>
             </div>
         </div>
@@ -469,6 +553,9 @@
         <p class="font-display text-xs md:text-sm text-[#0B1D21]/70 leading-relaxed">
             Takuwaku © 2026 | Novedades en <a href="https://instagram.com/tienda.takuwaku" target="_blank" class="text-[#E81E4A] font-bold hover:underline transition-colors">@tienda.takuwaku</a>
         </p>
+        <a href="terminos.html" target="_blank" class="text-[10px] text-[#0B1D21]/40 hover:text-[#0B1D21] hover:underline mt-2 inline-block">
+            Términos y Condiciones
+        </a>
     </footer>
 
     <!-- ================= FIREBASE (Firestore + Auth) ================= -->
@@ -483,7 +570,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import {
-            getFirestore, collection, doc, getDocs, setDoc, deleteDoc, updateDoc,
+            getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc,
             onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import {
@@ -510,7 +597,7 @@
 
         // Se expone todo lo necesario en window para que el script clásico (abajo) lo use.
         window.fb = {
-            db, auth, storage, collection, doc, getDocs, setDoc, deleteDoc, updateDoc,
+            db, auth, storage, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc,
             onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit,
             signInWithEmailAndPassword, onAuthStateChanged, signOut,
             storageRef, uploadBytes, getDownloadURL
@@ -522,6 +609,18 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
+        // Bloquea el scroll del fondo mientras haya al menos un modal/drawer abierto.
+        // Usa un contador por si dos modales llegaran a estar abiertos a la vez.
+        let openOverlaysCount = 0;
+        function lockBodyScroll() {
+            openOverlaysCount++;
+            document.body.style.overflow = 'hidden';
+        }
+        function unlockBodyScroll() {
+            openOverlaysCount = Math.max(0, openOverlaysCount - 1);
+            if (openOverlaysCount === 0) document.body.style.overflow = '';
+        }
+
         const imagePresets = {
             ramen: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><path d="M20 50C20 65 30 75 50 75C70 75 80 65 80 50H20Z" fill="#E81E4A" stroke="#0B1D21" stroke-width="4"/><path d="M15 35L45 52M85 35L40 52" stroke="#0B1D21" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="62" r="4" fill="#0B1D21"/><circle cx="35" cy="58" r="4" fill="#078A85"/></svg>`,
             ramune: `<svg class="w-full h-full" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" fill="#EDD5C5"/><rect x="42" y="20" width="16" height="55" rx="8" fill="#68BAAB" stroke="#0B1D21" stroke-width="4"/><rect x="45" y="12" width="10" height="8" rx="2" fill="#E81E4A" stroke="#0B1D21" stroke-width="3"/><circle cx="50" cy="45" r="5" fill="#ffffff" opacity="0.8"/></svg>`,
@@ -558,6 +657,8 @@
         let isAdmin = false;
         let productsUnsub = null; // para poder cancelar el listener de Firestore si hiciera falta
         let ordersUnsub = null; // listener del historial de pedidos (solo activo si hay sesión admin)
+        let couponsUnsub = null; // listener de cupones (solo activo si hay sesión admin)
+        let appliedCoupon = null; // cupón validado y aplicado al carrito actual: {code, type, value, minOrder}
         let pendingImageFile = null; // archivo de imagen seleccionado en el form, pendiente de subir
         let currentAdminSubtab = 'inventario';
         let pendingWhatsAppMessage = ''; // mensaje armado, listo para enviar cuando el cliente confirme desde el resumen
@@ -580,10 +681,12 @@
                     panel.classList.remove('hidden');
                     renderAdminInventory();
                     listenToOrders();
+                    listenToCoupons();
                 } else {
                     gate.classList.remove('hidden');
                     panel.classList.add('hidden');
                     if (ordersUnsub) { ordersUnsub(); ordersUnsub = null; }
+                    if (couponsUnsub) { couponsUnsub(); couponsUnsub = null; }
                 }
             });
 
@@ -617,6 +720,7 @@
                 products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderStoreLayout();
                 renderHomeOffers();
+                renderHomeComingSoon();
                 if (isAdmin) renderAdminInventory();
             }, (err) => {
                 console.error('Firestore onSnapshot error:', err);
@@ -643,6 +747,8 @@
             currentAdminSubtab = tab;
             document.getElementById('admin-view-inventario').classList.toggle('hidden', tab !== 'inventario');
             document.getElementById('admin-view-pedidos').classList.toggle('hidden', tab !== 'pedidos');
+            document.getElementById('admin-view-cupones').classList.toggle('hidden', tab !== 'cupones');
+            if (tab === 'cupones') document.getElementById('admin-view-cupones').classList.add('flex');
 
             document.querySelectorAll('.admin-subtab').forEach(btn => {
                 btn.className = "admin-subtab bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full brutal-border-sm brutal-shadow-sm text-sm";
@@ -700,6 +806,118 @@
             } catch (err) {
                 console.error(err);
                 showToast('No se pudo actualizar el estado', 'error');
+            }
+        }
+
+        // ================= CUPONES (Admin) =================
+        function listenToCoupons() {
+            const { db, collection, onSnapshot } = window.fb;
+            if (couponsUnsub) couponsUnsub();
+            couponsUnsub = onSnapshot(collection(db, 'coupons'), (snapshot) => {
+                const coupons = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAdminCoupons(coupons);
+            }, (err) => console.error('Firestore coupons onSnapshot error:', err));
+        }
+
+        function renderAdminCoupons(coupons) {
+            const list = document.getElementById('admin-coupons-list');
+            if (!list) return;
+
+            if (coupons.length === 0) {
+                list.innerHTML = `<p class="text-sm text-[#0B1D21]/60 text-center py-8">Todavía no has creado ningún cupón.</p>`;
+                return;
+            }
+
+            list.innerHTML = coupons.map(c => {
+                const valueLabel = c.type === 'percent' ? `${c.value}%` : `$${Number(c.value).toFixed(2)}`;
+                const usageLabel = c.maxUses ? `${c.usedCount || 0}/${c.maxUses} usos` : `${c.usedCount || 0} usos`;
+                const expiryLabel = c.expiresAt ? `Vence ${c.expiresAt}` : 'Sin vencimiento';
+                const minOrderLabel = c.minOrder ? `Mín. $${Number(c.minOrder).toFixed(2)}` : '';
+
+                return `
+                <div class="brutal-border-sm rounded-xl p-4 bg-[#EDD5C5]/20 flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                        <p class="font-display font-black text-[#E81E4A]">${c.id} <span class="text-[#0B1D21] font-bold">· -${valueLabel}</span></p>
+                        <p class="text-xs text-[#0B1D21]/60">${usageLabel} · ${expiryLabel} ${minOrderLabel ? '· ' + minOrderLabel : ''}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleCouponActive('${c.id}', ${c.active})" class="text-xs font-bold px-3 py-1.5 rounded-full brutal-border-sm ${c.active ? 'bg-[#078A85] text-white' : 'bg-white text-[#0B1D21]/50'}">
+                            ${c.active ? 'Activo' : 'Inactivo'}
+                        </button>
+                        <button onclick="deleteCoupon('${c.id}')" class="text-[#E81E4A] p-2 rounded hover:bg-[#E81E4A]/10 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function handleAddCoupon(e) {
+            e.preventDefault();
+            if (!isAdmin) return;
+
+            const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            const type = document.getElementById('coupon-type').value;
+            const value = parseFloat(document.getElementById('coupon-value').value);
+            const minOrderRaw = document.getElementById('coupon-min-order').value;
+            const maxUsesRaw = document.getElementById('coupon-max-uses').value;
+            const expiresAt = document.getElementById('coupon-expires').value || null;
+
+            if (!code || isNaN(value) || value <= 0) {
+                showToast("Revisa el código y el valor del cupón", "error");
+                return;
+            }
+            if (type === 'percent' && value > 100) {
+                showToast("Un descuento % no puede ser mayor a 100", "error");
+                return;
+            }
+
+            const { db, doc, getDoc, setDoc, serverTimestamp } = window.fb;
+            const couponRef = doc(db, 'coupons', code);
+
+            try {
+                const existing = await getDoc(couponRef);
+                if (existing.exists() && !confirm(`Ya existe un cupón "${code}". ¿Quieres reemplazarlo? Se reiniciará su contador de usos.`)) {
+                    return;
+                }
+
+                await setDoc(couponRef, {
+                    type,
+                    value,
+                    minOrder: minOrderRaw ? parseFloat(minOrderRaw) : null,
+                    maxUses: maxUsesRaw ? parseInt(maxUsesRaw) : null,
+                    expiresAt,
+                    active: true,
+                    usedCount: 0,
+                    createdAt: serverTimestamp()
+                });
+                showToast("¡Cupón creado con éxito!");
+                document.getElementById('add-coupon-form').reset();
+            } catch (err) {
+                console.error(err);
+                showToast("No se pudo crear el cupón", "error");
+            }
+        }
+
+        async function toggleCouponActive(code, currentActive) {
+            const { db, doc, updateDoc } = window.fb;
+            try {
+                await updateDoc(doc(db, 'coupons', code), { active: !currentActive });
+            } catch (err) {
+                console.error(err);
+                showToast("No se pudo actualizar el cupón", "error");
+            }
+        }
+
+        async function deleteCoupon(code) {
+            if (!confirm(`¿Eliminar el cupón "${code}"?`)) return;
+            const { db, doc, deleteDoc } = window.fb;
+            try {
+                await deleteDoc(doc(db, 'coupons', code));
+                if (appliedCoupon?.code === code) { appliedCoupon = null; updateCartUI(); }
+                showToast("Cupón eliminado", "error");
+            } catch (err) {
+                console.error(err);
+                showToast("No se pudo eliminar el cupón", "error");
             }
         }
         function handleAdminLogin(e) {
@@ -779,7 +997,7 @@
 
             if (tabId === 'admin' && isAdmin) renderAdminInventory();
             if (tabId === 'tienda') renderStoreLayout();
-            if (tabId === 'inicio') renderHomeOffers();
+            if (tabId === 'inicio') { renderHomeOffers(); renderHomeComingSoon(); }
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
             lucide.createIcons();
@@ -833,6 +1051,109 @@
             lucide.createIcons();
         }
 
+        function renderHomeComingSoon() {
+            const section = document.getElementById('home-coming-soon-section');
+            if (!section) return;
+
+            const comingSoonProducts = products.filter(p => p.comingSoon);
+            if (comingSoonProducts.length === 0) {
+                section.classList.add('hidden');
+                section.innerHTML = '';
+                return;
+            }
+
+            const cardsHTML = comingSoonProducts.map((p, i) => `
+                <div class="snap-item w-[170px] md:w-[200px] shrink-0 bg-white brutal-border brutal-shadow-sm rounded-2xl p-3 relative hover-float animate-pop-in opacity-90" style="animation-delay: ${i * 0.06}s">
+                    <span class="absolute top-2 left-2 bg-[#078A85] text-white border-2 border-[#0B1D21] font-display font-bold text-[9px] px-2 py-1 rounded-full z-10">🔜 Próximamente</span>
+                    <div class="w-full aspect-square rounded-xl overflow-hidden brutal-border-sm mb-3 bg-[#EDD5C5]/30">
+                        ${productImageHTML(p)}
+                    </div>
+                    <h4 class="font-display font-bold text-sm text-[#0B1D21] line-clamp-2 min-h-[2.3rem] leading-tight">${p.name}</h4>
+                    <p class="text-xs text-[#078A85] font-semibold mt-1">Disponible pronto</p>
+                </div>`).join('');
+
+            section.innerHTML = `
+                <div class="bg-[#078A85] brutal-border brutal-shadow rounded-3xl p-5 md:p-6 relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none">
+                        <i data-lucide="sparkles" class="w-40 h-40 text-white"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-4 relative z-10">
+                        <h3 class="font-display font-bold text-xl md:text-2xl text-white flex items-center gap-2">🔜 Próximamente</h3>
+                        <button onclick="switchTab('tienda')" class="text-white font-display font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">Ver todo <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto snap-container no-scrollbar relative z-10 pb-1">
+                        ${cardsHTML}
+                    </div>
+                </div>
+            `;
+            section.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // ================= DETALLE DE PRODUCTO =================
+        function openProductDetail(id) {
+            const p = products.find(p => p.id === id);
+            if (!p) return;
+
+            const effectivePrice = getEffectivePrice(p);
+            const onSale = effectivePrice < p.price;
+            const availableStock = p.stock - (cart[p.id] || 0);
+
+            document.getElementById('detail-image-wrap').innerHTML = productImageHTML(p, 'w-full h-full');
+            document.getElementById('detail-category').innerText = p.category;
+            document.getElementById('detail-name').innerText = p.name;
+
+            document.getElementById('detail-price').innerHTML = p.comingSoon
+                ? `<span class="font-display font-bold text-lg text-[#078A85]">Disponible pronto</span>`
+                : onSale
+                    ? `<span class="font-display font-black text-2xl text-[#E81E4A]">$${effectivePrice.toFixed(2)}</span><span class="text-sm text-[#0B1D21]/40 line-through">$${p.price.toFixed(2)}</span>`
+                    : `<span class="font-display font-black text-2xl text-[#0B1D21]">$${effectivePrice.toFixed(2)}</span>`;
+
+            document.getElementById('detail-badges').innerHTML = [
+                p.comingSoon ? `<span class="bg-[#078A85] text-white border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full">🔜 Próximamente</span>` : '',
+                (!p.comingSoon && availableStock <= 0) ? `<span class="bg-[#E81E4A] text-white border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full">Agotado</span>` : '',
+                (!p.comingSoon && onSale) ? `<span class="bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full">🔥 Oferta</span>` : '',
+                (!p.comingSoon && availableStock > 0 && availableStock <= 3) ? `<span class="bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full">¡Últimas ${availableStock}!</span>` : ''
+            ].join('');
+
+            document.getElementById('detail-description').innerText = p.description || 'Sin descripción disponible.';
+
+            const specs = [];
+            if (p.weight) specs.push(`<div class="flex items-center gap-2">⚖️ <span><strong>Presentación:</strong> ${p.weight}</span></div>`);
+            if (p.origin) specs.push(`<div class="flex items-center gap-2">🌏 <span><strong>Origen:</strong> ${p.origin}</span></div>`);
+            if (p.allergens) specs.push(`<div class="flex items-center gap-2">⚠️ <span><strong>Alérgenos:</strong> ${p.allergens}</span></div>`);
+            const specsEl = document.getElementById('detail-specs');
+            specsEl.innerHTML = specs.join('');
+            specsEl.classList.toggle('hidden', specs.length === 0);
+
+            const addBtn = document.getElementById('detail-add-btn');
+            if (p.comingSoon) {
+                addBtn.disabled = false;
+                addBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+                addBtn.innerHTML = `<i data-lucide="bell" class="w-5 h-5"></i> Avísame cuando esté disponible`;
+                addBtn.onclick = () => { notifyComingSoon(id); closeProductDetail(); };
+            } else {
+                addBtn.disabled = availableStock <= 0;
+                addBtn.classList.toggle('opacity-40', availableStock <= 0);
+                addBtn.classList.toggle('cursor-not-allowed', availableStock <= 0);
+                addBtn.innerHTML = `<i data-lucide="shopping-bag" class="w-5 h-5"></i> Agregar al carrito`;
+                addBtn.onclick = () => { addToCart(id); closeProductDetail(); };
+            }
+
+            const modal = document.getElementById('product-detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lockBodyScroll();
+            lucide.createIcons();
+        }
+
+        function closeProductDetail() {
+            const modal = document.getElementById('product-detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            unlockBodyScroll();
+        }
+
         // Genera el HTML de una tarjeta de producto. highlight=true le da un estilo más llamativo (usado en Ofertas).
         function buildProductCardHTML(p, delay, highlight = false) {
             const inCartQty = cart[p.id] || 0;
@@ -842,7 +1163,10 @@
             let badgeHTML = '';
             let disableBtn = false;
 
-            if (availableStock <= 0) {
+            if (p.comingSoon) {
+                badgeHTML = `<span class="absolute top-2.5 left-2.5 bg-[#078A85] text-white border-2 border-[#0B1D21] font-display font-bold text-[9px] uppercase px-2.5 py-1 rounded-full z-10 shadow-sm">🔜 Próximamente</span>`;
+                disableBtn = true;
+            } else if (availableStock <= 0) {
                 badgeHTML = `<span class="absolute top-2.5 left-2.5 bg-[#E81E4A] text-white border-2 border-[#0B1D21] font-display font-bold text-[9px] uppercase px-2.5 py-1 rounded-full z-10 shadow-sm">Agotado</span>`;
                 disableBtn = true;
             } else if (onSale) {
@@ -852,14 +1176,25 @@
                 badgeHTML = `<span class="absolute top-2.5 left-2.5 bg-[#ffdd57] text-[#0B1D21] border-2 border-[#0B1D21] font-display font-bold text-[9px] uppercase px-2.5 py-1 rounded-full z-10 shadow-sm animate-pulse">¡Últimas ${availableStock}!</span>`;
             }
 
-            const priceHTML = onSale
-                ? `<span class="flex items-baseline gap-1.5 flex-wrap"><span class="font-display font-black text-lg text-[#E81E4A]">$${effectivePrice.toFixed(2)}</span><span class="text-xs text-[#0B1D21]/40 line-through">$${p.price.toFixed(2)}</span></span>`
-                : `<span class="font-display font-black text-lg text-[#0B1D21]">$${effectivePrice.toFixed(2)}</span>`;
+            const priceHTML = p.comingSoon
+                ? `<span class="font-display font-bold text-sm text-[#078A85]">Disponible pronto</span>`
+                : onSale
+                    ? `<span class="flex items-baseline gap-1.5 flex-wrap"><span class="font-display font-black text-lg text-[#E81E4A]">$${effectivePrice.toFixed(2)}</span><span class="text-xs text-[#0B1D21]/40 line-through">$${p.price.toFixed(2)}</span></span>`
+                    : `<span class="font-display font-black text-lg text-[#0B1D21]">$${effectivePrice.toFixed(2)}</span>`;
+
+            const actionBtnHTML = p.comingSoon
+                ? `<button onclick="event.stopPropagation(); notifyComingSoon('${p.id}')" class="bg-[#078A85] text-white p-2 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center shrink-0" title="Avísame cuando esté disponible">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                   </button>`
+                : `<button onclick="event.stopPropagation(); addToCart('${p.id}')" ${disableBtn ? 'disabled' : ''} class="bg-[#E81E4A] text-white p-2 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center shrink-0 ${disableBtn ? 'opacity-40 cursor-not-allowed shadow-none' : ''}">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                   </button>`;
 
             const cardBorderClass = highlight ? 'brutal-border border-[#ffdd57]' : 'brutal-border';
+            const cardOpacityClass = p.comingSoon ? 'opacity-90' : '';
 
             return `
-            <div class="bg-white ${cardBorderClass} brutal-shadow-sm rounded-2xl p-3 flex flex-col justify-between relative hover-float animate-pop-in" style="animation-delay: ${delay}s">
+            <div class="bg-white ${cardBorderClass} ${cardOpacityClass} brutal-shadow-sm rounded-2xl p-3 flex flex-col justify-between relative hover-float animate-pop-in cursor-pointer" style="animation-delay: ${delay}s" onclick="openProductDetail('${p.id}')">
                 ${badgeHTML}
                 <div class="w-full aspect-square rounded-xl overflow-hidden brutal-border-sm mb-3 bg-[#EDD5C5]/30 group">
                     <div class="w-full h-full transition-transform duration-300 group-hover:scale-110">
@@ -872,9 +1207,7 @@
                 </div>
                 <div class="flex items-end justify-between mt-3 pt-3 border-t border-[#0B1D21]/10 gap-2">
                     ${priceHTML}
-                    <button onclick="addToCart('${p.id}')" ${disableBtn ? 'disabled' : ''} class="bg-[#E81E4A] text-white p-2 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn flex items-center justify-center shrink-0 ${disableBtn ? 'opacity-40 cursor-not-allowed shadow-none' : ''}">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                    </button>
+                    ${actionBtnHTML}
                 </div>
             </div>`;
         }
@@ -887,8 +1220,10 @@
 
             const searchQuery = document.getElementById('store-search').value.toLowerCase();
             const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery));
-            
-            const categories = [...new Set(filteredProducts.map(p => p.category))];
+            const regularProducts = filteredProducts.filter(p => !p.comingSoon);
+            const comingSoonProducts = filteredProducts.filter(p => p.comingSoon);
+
+            const categories = [...new Set(regularProducts.map(p => p.category))];
             const catIcons = { "Snacks": "🍿", "Bebidas": "🥤", "Sopas": "🍜", "Coleccionables": "🎨" };
 
             if(filteredProducts.length === 0) {
@@ -900,7 +1235,7 @@
             }
 
             // ---- Sección destacada de Ofertas (siempre primero, con estilo llamativo) ----
-            const saleProducts = filteredProducts.filter(p => getEffectivePrice(p) < p.price);
+            const saleProducts = regularProducts.filter(p => getEffectivePrice(p) < p.price);
             if (saleProducts.length > 0) {
                 const offersBubble = document.createElement('a');
                 offersBubble.href = `#cat-ofertas`;
@@ -930,7 +1265,7 @@
             });
 
             categories.forEach((cat, catIndex) => {
-                const catProducts = filteredProducts.filter(p => p.category === cat);
+                const catProducts = regularProducts.filter(p => p.category === cat);
                 if(catProducts.length === 0) return;
 
                 const cardsHTML = catProducts.map((p, i) => buildProductCardHTML(p, i * 0.06)).join('');
@@ -946,7 +1281,38 @@
                     </div>
                 `;
             });
+
+            // ---- Sección de Próximamente (al final, con estilo distinto para diferenciarla) ----
+            if (comingSoonProducts.length > 0) {
+                const comingSoonBubble = document.createElement('a');
+                comingSoonBubble.href = `#cat-proximamente`;
+                comingSoonBubble.className = "snap-item bg-[#078A85] brutal-border-sm brutal-shadow-sm rounded-full px-5 py-3 flex items-center gap-2 shrink-0 font-display font-bold text-sm text-white hover:brightness-110 transition";
+                comingSoonBubble.innerHTML = `<span>🔜</span> Próximamente`;
+                bubbles.appendChild(comingSoonBubble);
+
+                const comingSoonCardsHTML = comingSoonProducts.map((p, i) => buildProductCardHTML(p, i * 0.06)).join('');
+                content.innerHTML += `
+                    <div id="cat-proximamente" class="scroll-mt-32 bg-[#0B1D21] rounded-3xl p-4 md:p-6 brutal-border brutal-shadow">
+                        <h3 class="font-display font-bold text-2xl text-white mb-1 flex items-center gap-2">
+                            🔜 Próximamente
+                        </h3>
+                        <p class="text-white/60 text-xs mb-4">Toca la campanita para pedir que te avisemos por WhatsApp</p>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            ${comingSoonCardsHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
             lucide.createIcons();
+        }
+
+        // Abre WhatsApp con un mensaje prellenado para que avisen al cliente cuando el producto esté disponible
+        function notifyComingSoon(id) {
+            const p = products.find(p => p.id === id);
+            if (!p) return;
+            const message = `⛩️ ¡Hola Takuwaku! Me interesa "${p.name}" que vi como Próximamente. ¿Me avisan cuando ya esté disponible?`;
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
         // ================= CARRITO DE COMPRAS =================
@@ -956,9 +1322,11 @@
             if (drawer.classList.contains('pointer-events-none')) {
                 drawer.classList.remove('pointer-events-none', 'opacity-0');
                 panel.classList.remove('translate-x-full');
+                lockBodyScroll();
             } else {
                 drawer.classList.add('pointer-events-none', 'opacity-0');
                 panel.classList.add('translate-x-full');
+                unlockBodyScroll();
             }
         }
 
@@ -985,12 +1353,23 @@
             renderStoreLayout();
         }
 
+        // Calcula el descuento de appliedCoupon sobre un subtotal dado. Devuelve 0 si no aplica o ya no es válido.
+        function computeDiscount(subtotal) {
+            if (!appliedCoupon) return 0;
+            if (appliedCoupon.minOrder && subtotal < appliedCoupon.minOrder) return 0;
+            const raw = appliedCoupon.type === 'percent' ? subtotal * (appliedCoupon.value / 100) : appliedCoupon.value;
+            return Math.min(raw, subtotal);
+        }
+
         function updateCartUI() {
             const container = document.getElementById('cart-items-container');
             const countBadge = document.getElementById('cart-count');
             const totalLabel = document.getElementById('cart-total-amount');
             const formContainer = document.getElementById('checkout-form-container');
             const btnCheckout = document.getElementById('btn-checkout');
+            const couponSection = document.getElementById('coupon-section');
+            const couponInputWrap = document.getElementById('coupon-input-wrap');
+            const couponToggleBtn = document.getElementById('coupon-toggle-btn');
             
             container.innerHTML = '';
             
@@ -1002,6 +1381,11 @@
                 countBadge.classList.add('hidden');
                 totalLabel.innerText = "$0.00";
                 formContainer.classList.add('hidden');
+                appliedCoupon = null;
+                couponSection.classList.add('hidden');
+                couponInputWrap.classList.add('hidden');
+                document.getElementById('coupon-applied-chip').classList.add('hidden');
+                document.getElementById('cart-breakdown').classList.add('hidden');
                 btnCheckout.disabled = true;
                 btnCheckout.classList.add('opacity-50', 'cursor-not-allowed');
                 lucide.createIcons(); 
@@ -1009,6 +1393,7 @@
             }
 
             formContainer.classList.remove('hidden');
+            couponSection.classList.remove('hidden');
             btnCheckout.disabled = false;
             btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -1040,19 +1425,103 @@
             countBadge.classList.add('animate-cart-bump');
             setTimeout(() => countBadge.classList.remove('animate-cart-bump'), 500);
 
-            totalLabel.innerText = `$${totalPrice.toFixed(2)}`;
+            // ---- Cupón: validar contra el subtotal actual y calcular descuento ----
+            const appliedChip = document.getElementById('coupon-applied-chip');
+            const breakdown = document.getElementById('cart-breakdown');
+
+            if (appliedCoupon && appliedCoupon.minOrder && totalPrice < appliedCoupon.minOrder) {
+                showToast(`El cupón requiere una compra mínima de $${appliedCoupon.minOrder.toFixed(2)}`, 'error');
+                appliedCoupon = null;
+            }
+
+            if (appliedCoupon) {
+                couponToggleBtn.classList.add('hidden');
+                couponInputWrap.classList.add('hidden');
+                appliedChip.classList.remove('hidden');
+                const valueLabel = appliedCoupon.type === 'percent' ? `${appliedCoupon.value}%` : `$${appliedCoupon.value.toFixed(2)}`;
+                document.getElementById('coupon-applied-label').innerText = `${appliedCoupon.code} · -${valueLabel}`;
+
+                const discount = computeDiscount(totalPrice);
+                breakdown.classList.remove('hidden');
+                document.getElementById('cart-subtotal-amount').innerText = `$${totalPrice.toFixed(2)}`;
+                document.getElementById('cart-discount-amount').innerText = `-$${discount.toFixed(2)}`;
+                totalLabel.innerText = `$${(totalPrice - discount).toFixed(2)}`;
+            } else {
+                couponToggleBtn.classList.remove('hidden');
+                appliedChip.classList.add('hidden');
+                breakdown.classList.add('hidden');
+                totalLabel.innerText = `$${totalPrice.toFixed(2)}`;
+            }
+
             lucide.createIcons();
         }
 
+        // Abre/cierra el pequeño formulario de cupón (empieza oculto para no saturar el carrito)
+        function toggleCouponBox() {
+            const wrap = document.getElementById('coupon-input-wrap');
+            const isHidden = wrap.classList.contains('hidden');
+            wrap.classList.toggle('hidden');
+            wrap.classList.toggle('flex', isHidden);
+            if (isHidden) document.getElementById('coupon-code-input').focus();
+        }
+
+        async function applyCoupon() {
+            const input = document.getElementById('coupon-code-input');
+            const code = input.value.trim().toUpperCase();
+            const msgEl = document.getElementById('coupon-message');
+            msgEl.classList.add('hidden');
+
+            if (!code) return;
+
+            const totalPrice = Object.keys(cart).reduce((acc, id) => {
+                const p = products.find(p => p.id === id);
+                return acc + getEffectivePrice(p) * cart[id];
+            }, 0);
+
+            const { db, doc, getDoc } = window.fb;
+            try {
+                const snap = await getDoc(doc(db, 'coupons', code));
+                if (!snap.exists()) throw new Error('Ese cupón no existe');
+                const c = snap.data();
+                if (!c.active) throw new Error('Ese cupón ya no está disponible');
+                if (c.expiresAt && new Date(c.expiresAt + 'T23:59:59') < new Date()) throw new Error('Ese cupón ya expiró');
+                if (c.maxUses && (c.usedCount || 0) >= c.maxUses) throw new Error('Ese cupón ya alcanzó su límite de usos');
+                if (c.minOrder && totalPrice < c.minOrder) throw new Error(`Requiere una compra mínima de $${c.minOrder.toFixed(2)}`);
+
+                appliedCoupon = { code, type: c.type, value: c.value, minOrder: c.minOrder || 0 };
+                input.value = '';
+                showToast('¡Cupón aplicado!');
+                updateCartUI();
+            } catch (err) {
+                msgEl.innerText = err.message;
+                msgEl.className = 'text-xs font-semibold mt-1 text-[#E81E4A]';
+                msgEl.classList.remove('hidden');
+            }
+        }
+
+        function removeCoupon() {
+            appliedCoupon = null;
+            updateCartUI();
+        }
+
         // ================= RESUMEN DE PEDIDO (pantalla para captura) =================
-        function showOrderSummary({ orderItems, total, deliveryMethod, paymentMethod }) {
+        function showOrderSummary({ orderItems, total, deliveryMethod, paymentMethod, discount = 0, couponCode = null }) {
             document.getElementById('summary-date').innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
-            document.getElementById('summary-items').innerHTML = orderItems.map(it => `
+            let itemsHTML = orderItems.map(it => `
                 <div class="flex justify-between text-sm">
                     <span class="text-[#0B1D21]/80">${it.qty}x ${it.name}</span>
                     <span class="font-semibold">$${it.subtotal.toFixed(2)}</span>
                 </div>`).join('');
+
+            if (discount > 0) {
+                itemsHTML += `
+                <div class="flex justify-between text-sm text-[#078A85] font-semibold pt-1 border-t border-dashed border-[#0B1D21]/10 mt-1">
+                    <span>🎟️ Cupón ${couponCode}</span>
+                    <span>-$${discount.toFixed(2)}</span>
+                </div>`;
+            }
+            document.getElementById('summary-items').innerHTML = itemsHTML;
 
             document.getElementById('summary-total').innerText = `$${total.toFixed(2)}`;
 
@@ -1065,6 +1534,7 @@
             const modal = document.getElementById('order-summary-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            lockBodyScroll();
             lucide.createIcons();
         }
 
@@ -1078,6 +1548,7 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             pendingWhatsAppMessage = '';
+            unlockBodyScroll();
         }
 
         async function handleCheckout() {
@@ -1103,11 +1574,14 @@
                 const effectivePrice = getEffectivePrice(p);
                 return { productId: id, name: p.name, price: effectivePrice, qty: cart[id], subtotal: effectivePrice * cart[id] };
             });
-            const total = orderItems.reduce((acc, it) => acc + it.subtotal, 0);
+            const subtotal = orderItems.reduce((acc, it) => acc + it.subtotal, 0);
+            const couponToApply = appliedCoupon; // se congela por si el usuario lo cambia mientras corre la transacción
+            let discount = 0;
 
             try {
-                // Transacción: valida y descuenta stock real en Firestore para evitar
-                // que dos clientes compren la última pieza al mismo tiempo.
+                // Transacción: valida y descuenta stock real en Firestore, y si hay cupón,
+                // lo revalida y aumenta su contador de usos — todo de forma atómica para evitar
+                // que dos clientes compren la última pieza o agoten un cupón al mismo tiempo.
                 await runTransaction(db, async (tx) => {
                     for (const item of orderItems) {
                         const ref = doc(db, 'products', item.productId);
@@ -1117,12 +1591,29 @@
                         if (currentStock < item.qty) throw new Error(`Ya no hay suficiente stock de ${item.name}`);
                         tx.update(ref, { stock: currentStock - item.qty });
                     }
+
+                    if (couponToApply) {
+                        const couponRef = doc(db, 'coupons', couponToApply.code);
+                        const couponSnap = await tx.get(couponRef);
+                        if (!couponSnap.exists() || !couponSnap.data().active) throw new Error('El cupón ya no está disponible');
+                        const c = couponSnap.data();
+                        if (c.expiresAt && new Date(c.expiresAt + 'T23:59:59') < new Date()) throw new Error('El cupón ya expiró');
+                        if (c.maxUses && (c.usedCount || 0) >= c.maxUses) throw new Error('El cupón ya alcanzó su límite de usos');
+                        if (c.minOrder && subtotal < c.minOrder) throw new Error(`El cupón requiere una compra mínima de $${c.minOrder.toFixed(2)}`);
+
+                        discount = c.type === 'percent' ? subtotal * (c.value / 100) : Math.min(c.value, subtotal);
+                        tx.update(couponRef, { usedCount: (c.usedCount || 0) + 1 });
+                    }
                 });
+
+                const total = subtotal - discount;
 
                 // Guarda el pedido para que quede un historial y no dependa solo de WhatsApp
                 await addDoc(collection(db, 'orders'), {
                     customerName, deliveryMethod, paymentMethod,
-                    items: orderItems, total,
+                    items: orderItems, subtotal, total,
+                    couponCode: couponToApply?.code || null,
+                    discount,
                     createdAt: serverTimestamp(),
                     status: 'pendiente'
                 });
@@ -1132,14 +1623,18 @@
                 orderItems.forEach(it => {
                     message += `▪️ ${it.qty}x _${it.name}_ -> *$${it.subtotal.toFixed(2)}*\n`;
                 });
+                if (couponToApply) {
+                    message += `\n🎟️ *Cupón:* ${couponToApply.code} (-$${discount.toFixed(2)})\n`;
+                }
                 message += `\n🚚 *Entrega:* ${deliveryMethod}\n`;
                 message += `💵 *Pago:* ${paymentMethod}\n`;
                 message += `\n💰 *Total a Pagar:* *$${total.toFixed(2)} MXN*`;
 
                 pendingWhatsAppMessage = message;
-                showOrderSummary({ orderItems, total, deliveryMethod, paymentMethod });
+                showOrderSummary({ orderItems, total, deliveryMethod, paymentMethod, discount, couponCode: couponToApply?.code });
 
                 cart = {};
+                appliedCoupon = null;
                 document.getElementById('checkout-name').value = '';
                 updateCartUI();
                 toggleCart();
@@ -1261,6 +1756,11 @@
             document.getElementById('prod-sale-price').value = p.salePrice || '';
             document.getElementById('prod-category').value = p.category;
             document.getElementById('prod-img').value = p.preset;
+            document.getElementById('prod-description').value = p.description || '';
+            document.getElementById('prod-weight').value = p.weight || '';
+            document.getElementById('prod-origin').value = p.origin || '';
+            document.getElementById('prod-allergens').value = p.allergens || '';
+            document.getElementById('prod-coming-soon').checked = !!p.comingSoon;
             document.getElementById('prod-image-file').value = '';
             document.getElementById('prod-image-url').value = (p.imageUrl && !p.imageUrl.includes('firebasestorage')) ? p.imageUrl : '';
 
@@ -1305,6 +1805,11 @@
             const salePrice = salePriceRaw ? parseFloat(salePriceRaw) : null;
             const category = document.getElementById('prod-category').value;
             const preset = document.getElementById('prod-img').value;
+            const description = document.getElementById('prod-description').value.trim();
+            const weight = document.getElementById('prod-weight').value.trim();
+            const origin = document.getElementById('prod-origin').value.trim();
+            const allergens = document.getElementById('prod-allergens').value.trim();
+            const comingSoon = document.getElementById('prod-coming-soon').checked;
 
             if (isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
                 showToast("Ingresa valores numéricos válidos", "error");
@@ -1344,6 +1849,11 @@
                 const productData = { name, price, stock, category, preset };
                 if (salePrice !== null) productData.salePrice = salePrice;
                 if (imageUrl) productData.imageUrl = imageUrl;
+                productData.description = description || null;
+                productData.weight = weight || null;
+                productData.origin = origin || null;
+                productData.allergens = allergens || null;
+                productData.comingSoon = comingSoon;
 
                 await setDoc(doc(db, 'products', id), productData);
                 showToast(editingProductId ? "¡Cambios guardados con éxito!" : "¡Nuevo Producto Agregado!");
