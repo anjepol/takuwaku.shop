@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Gestión | Takuwaku</title>
+    <meta name="theme-color" content="#0B1D21">
+    <link rel="manifest" href="gestion-manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --color-primary: #68BAAB;
+            --color-dark-teal: #078A85;
+            --color-dark: #0B1D21;
+            --color-cream: #EDD5C5;
+            --color-logo: #E81E4A;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F4EDE6;
+            color: var(--color-dark);
+            min-height: 100vh;
+            padding-bottom: 84px;
+        }
+        h1, h2, h3, .font-display { font-family: 'Fredoka', sans-serif; }
+        .brutal-border { border: 3px solid var(--color-dark); }
+        .brutal-border-sm { border: 2px solid var(--color-dark); }
+        .brutal-shadow { box-shadow: 5px 5px 0px var(--color-dark); }
+        .brutal-shadow-sm { box-shadow: 3px 3px 0px var(--color-dark); }
+        .brutal-btn { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .brutal-btn:active { transform: translateY(2px); box-shadow: 1px 1px 0px var(--color-dark); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-view { display: none; }
+        .tab-view.active { display: block; }
+        .nav-btn.active { color: var(--color-logo); }
+        .nav-btn.active .nav-icon-wrap { background: var(--color-logo); }
+        .nav-btn.active .nav-icon-wrap i { color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ================= LOGIN GATE ================= -->
+    <div id="login-gate" class="fixed inset-0 bg-[#0B1D21] z-[80] flex items-center justify-center p-4">
+        <div class="bg-white brutal-border brutal-shadow rounded-2xl p-8 w-full max-w-sm flex flex-col gap-4">
+            <div class="text-center mb-2">
+                <span class="text-4xl">⛩️</span>
+                <h1 class="font-display font-bold text-xl mt-2">Panel de Gestión</h1>
+                <p class="text-xs text-[#0B1D21]/50">Takuwaku · Acceso administrador</p>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)" class="flex flex-col gap-3">
+                <input type="email" id="login-email" required placeholder="Correo" class="w-full bg-[#EDD5C5]/40 p-3 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                <input type="password" id="login-password" required placeholder="Contraseña" class="w-full bg-[#EDD5C5]/40 p-3 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                <button type="submit" class="w-full bg-[#E81E4A] text-white font-bold py-3 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">Entrar</button>
+                <p id="login-error" class="text-xs text-[#E81E4A] font-semibold hidden text-center"></p>
+            </form>
+            <p class="text-[10px] text-center text-[#0B1D21]/40">Usa el mismo correo y contraseña del panel admin de la tienda.</p>
+        </div>
+    </div>
+
+    <!-- ================= APP PRINCIPAL ================= -->
+    <div id="app-root" class="hidden">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-40 bg-[#0B1D21] text-white px-4 py-3 flex items-center justify-between shadow-md">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">⛩️</span>
+                <div>
+                    <h1 class="font-display font-bold text-sm leading-none">Gestión Takuwaku</h1>
+                    <p id="connection-pill" class="text-[10px] text-white/50 leading-none mt-0.5">● En línea</p>
+                </div>
+            </div>
+            <button onclick="handleLogout()" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </header>
+
+        <main class="max-w-3xl mx-auto p-4">
+
+            <!-- ============ DASHBOARD ============ -->
+            <section id="tab-dashboard" class="tab-view active flex flex-col gap-4">
+                <h2 class="font-display font-bold text-xl">📊 Dashboard</h2>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-[#0B1D21]/50 uppercase">Ventas Totales</p>
+                        <p id="stat-revenue" class="font-display font-black text-xl text-[#078A85]">$0.00</p>
+                        <p class="text-[10px] text-[#0B1D21]/40 mt-1">Pedidos no cancelados</p>
+                    </div>
+                    <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-[#0B1D21]/50 uppercase">Ganancia Neta Est.</p>
+                        <p id="stat-net-profit" class="font-display font-black text-xl text-[#E81E4A]">$0.00</p>
+                        <p class="text-[10px] text-[#0B1D21]/40 mt-1">Ventas − costo − gastos</p>
+                    </div>
+                    <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-[#0B1D21]/50 uppercase">Valor Inventario</p>
+                        <p id="stat-inventory-value" class="font-display font-black text-xl text-[#0B1D21]">$0.00</p>
+                        <p class="text-[10px] text-[#0B1D21]/40 mt-1">A precio de costo</p>
+                    </div>
+                    <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-[#0B1D21]/50 uppercase">Pagos Pendientes</p>
+                        <p id="stat-pending-payments" class="font-display font-black text-xl text-[#ffab00]">$0.00</p>
+                        <p id="stat-pending-count" class="text-[10px] text-[#0B1D21]/40 mt-1">0 pedidos</p>
+                    </div>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3 flex items-center gap-1.5"><i data-lucide="bar-chart-3" class="w-4 h-4 text-[#078A85]"></i> Ventas últimos 7 días</h3>
+                    <div id="sales-chart" class="flex items-end gap-2 h-32"></div>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3 flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4 text-[#E81E4A]"></i> Stock bajo</h3>
+                    <div id="low-stock-list" class="flex flex-col gap-2"></div>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3 flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-[#078A85]"></i> Pedidos recientes</h3>
+                    <div id="recent-orders-list" class="flex flex-col gap-2"></div>
+                </div>
+            </section>
+
+            <!-- ============ PAGOS ============ -->
+            <section id="tab-pagos" class="tab-view flex flex-col gap-4">
+                <h2 class="font-display font-bold text-xl">💵 Pagos</h2>
+                <div class="flex gap-2">
+                    <button onclick="setPagosFilter('todos')" id="pagos-filter-todos" class="pagos-filter-btn bg-[#0B1D21] text-white font-display font-bold px-4 py-2 rounded-full text-xs brutal-border-sm">Todos</button>
+                    <button onclick="setPagosFilter('pendiente')" id="pagos-filter-pendiente" class="pagos-filter-btn bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full text-xs brutal-border-sm">Pendientes</button>
+                    <button onclick="setPagosFilter('pagado')" id="pagos-filter-pagado" class="pagos-filter-btn bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full text-xs brutal-border-sm">Pagados</button>
+                </div>
+                <div id="pagos-list" class="flex flex-col gap-3"></div>
+            </section>
+
+            <!-- ============ INVENTARIO ============ -->
+            <section id="tab-inventario" class="tab-view flex flex-col gap-4">
+                <h2 class="font-display font-bold text-xl">📦 Inventario</h2>
+
+                <div class="bg-[#EDD5C5] brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3">Registrar Movimiento</h3>
+                    <form id="movement-form" onsubmit="handleAddMovement(event)" class="flex flex-col gap-2">
+                        <select id="mov-type" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                            <option value="entrada">📥 Entrada (compra de mercancía)</option>
+                            <option value="salida">📤 Salida (merma / pérdida / uso interno)</option>
+                        </select>
+                        <select id="mov-product" required class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none"></select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="mov-qty" required min="1" placeholder="Cantidad" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                            <input type="number" step="0.01" id="mov-cost" placeholder="Costo unitario ($)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                        </div>
+                        <input type="text" id="mov-note" placeholder="Nota (opcional)" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                        <button type="submit" class="w-full bg-[#078A85] text-white font-bold py-2.5 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm mt-1">Registrar</button>
+                    </form>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3">Stock y Costo Actual</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[420px] text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-[#0B1D21] font-bold uppercase text-[10px]">
+                                    <th class="pb-2">Producto</th>
+                                    <th class="pb-2 text-center">Stock</th>
+                                    <th class="pb-2 text-right">Costo</th>
+                                    <th class="pb-2 text-right">Precio</th>
+                                    <th class="pb-2 text-right">Margen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3">Historial de Movimientos</h3>
+                    <div id="movements-list" class="flex flex-col gap-2"></div>
+                </div>
+            </section>
+
+            <!-- ============ COSTOS ============ -->
+            <section id="tab-costos" class="tab-view flex flex-col gap-4">
+                <h2 class="font-display font-bold text-xl">🧮 Costos y Ganancias</h2>
+
+                <div class="bg-[#EDD5C5] brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3">Calculadora rápida</h3>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <input type="number" step="0.01" id="calc-cost" placeholder="Costo ($)" oninput="runCalculator()" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                        <input type="number" step="0.01" id="calc-price" placeholder="Precio venta ($)" oninput="runCalculator()" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                    </div>
+                    <input type="number" id="calc-qty" placeholder="Cantidad a vender (opcional)" oninput="runCalculator()" value="1" class="w-full bg-white p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none mb-3">
+                    <div id="calc-result" class="grid grid-cols-2 gap-2 text-xs"></div>
+                </div>
+
+                <div class="bg-white brutal-border brutal-shadow-sm rounded-2xl p-4">
+                    <h3 class="font-display font-bold text-sm mb-3">Gastos Generales</h3>
+                    <form id="expense-form" onsubmit="handleAddExpense(event)" class="flex flex-col gap-2 mb-4">
+                        <input type="text" id="expense-desc" required placeholder="Descripción (Ej. Gasolina, empaques)" class="w-full bg-[#EDD5C5]/30 p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" step="0.01" id="expense-amount" required placeholder="Monto ($)" class="w-full bg-[#EDD5C5]/30 p-2.5 rounded-lg brutal-border-sm text-sm font-semibold focus:outline-none">
+                            <input type="date" id="expense-date" class="w-full bg-[#EDD5C5]/30 p-2.5 rounded-lg brutal-border-sm text-xs font-semibold focus:outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-[#E81E4A] text-white font-bold py-2.5 rounded-full brutal-border-sm brutal-shadow-sm brutal-btn text-sm">Agregar Gasto</button>
+                    </form>
+                    <div id="expenses-list" class="flex flex-col gap-2"></div>
+                    <div class="flex justify-between items-center pt-3 mt-2 border-t-2 border-[#0B1D21] font-display font-bold text-sm">
+                        <span>Total Gastos:</span>
+                        <span id="expenses-total" class="text-[#E81E4A]">$0.00</span>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ================= NAV INFERIOR (estilo app) ================= -->
+    <nav id="bottom-nav" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#0B1D21] z-50 flex justify-around items-center py-2 px-2">
+        <button onclick="switchAppTab('dashboard')" id="nav-dashboard" class="nav-btn active flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#0B1D21]/50 flex-1 py-1">
+            <span class="nav-icon-wrap w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></span>
+            Dashboard
+        </button>
+        <button onclick="switchAppTab('pagos')" id="nav-pagos" class="nav-btn flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#0B1D21]/50 flex-1 py-1">
+            <span class="nav-icon-wrap w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i data-lucide="wallet" class="w-4 h-4"></i></span>
+            Pagos
+        </button>
+        <button onclick="switchAppTab('inventario')" id="nav-inventario" class="nav-btn flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#0B1D21]/50 flex-1 py-1">
+            <span class="nav-icon-wrap w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i data-lucide="package" class="w-4 h-4"></i></span>
+            Inventario
+        </button>
+        <button onclick="switchAppTab('costos')" id="nav-costos" class="nav-btn flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#0B1D21]/50 flex-1 py-1">
+            <span class="nav-icon-wrap w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i data-lucide="calculator" class="w-4 h-4"></i></span>
+            Costos
+        </button>
+    </nav>
+
+    <!-- ================= FIREBASE ================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit,
+            enableIndexedDbPersistence
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiqeVvJu42SQG7mkC9YlFF4haHPlTDV8A",
+            authDomain: "takuwaku-e5d77.firebaseapp.com",
+            projectId: "takuwaku-e5d77",
+            storageBucket: "takuwaku-e5d77.firebasestorage.app",
+            messagingSenderId: "583361940669",
+            appId: "1:583361940669:web:4d5f9f2eec7a7fd5503bd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Habilita persistencia offline: Firestore guarda una copia local en el dispositivo,
+        // permite seguir leyendo y escribiendo sin conexión, y sincroniza solo cuando vuelve el internet.
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code === 'failed-precondition') {
+                console.warn('Persistencia offline solo puede activarse en una pestaña a la vez.');
+            } else if (err.code === 'unimplemented') {
+                console.warn('Este navegador no soporta persistencia offline.');
+            }
+        });
+
+        window.fb = {
+            db, auth, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc,
+            onSnapshot, addDoc, runTransaction, serverTimestamp, query, orderBy, limit,
+            signInWithEmailAndPassword, onAuthStateChanged, signOut
+        };
+
+        window.dispatchEvent(new Event('fb-ready'));
+    </script>
+
+    <!-- ================= LÓGICA DE LA APP ================= -->
+    <script>
+        // ---------- Estado global ----------
+        let state = {
+            products: [],
+            costs: {},      // { productId: { cost, updatedAt } }
+            orders: [],
+            movements: [],
+            expenses: []
+        };
+        let currentTab = 'dashboard';
+        let pagosFilter = 'todos';
+        const unsubs = {};
+
+        // ---------- Utilidades ----------
+        function money(n) { return `$${(Number(n) || 0).toFixed(2)}`; }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded-xl brutal-border-sm brutal-shadow-sm font-display font-bold text-xs bg-white flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.style.borderColor = type === 'success' ? '#078A85' : '#E81E4A';
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-triangle'}" class="w-4 h-4 ${type === 'success' ? 'text-[#078A85]' : 'text-[#E81E4A]'}"></i> ${message}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => { toast.classList.add('translate-y-2', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 2500);
+        }
+
+        function productCost(productId) {
+            return state.costs[productId]?.cost || 0;
+        }
+
+        // ---------- Indicador de conexión ----------
+        function updateConnectionPill() {
+            const pill = document.getElementById('connection-pill');
+            if (navigator.onLine) {
+                pill.innerHTML = '<span class="text-[#68BAAB]">●</span> En línea';
+            } else {
+                pill.innerHTML = '<span class="text-[#ffab00]">●</span> Sin conexión · los cambios se guardan y sincronizan después';
+            }
+        }
+        window.addEventListener('online', updateConnectionPill);
+        window.addEventListener('offline', updateConnectionPill);
+
+        // ---------- Auth ----------
+        function handleLogin(e) {
+            e.preventDefault();
+            const { auth, signInWithEmailAndPassword } = window.fb;
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            errorEl.classList.add('hidden');
+
+            signInWithEmailAndPassword(auth, email, password).catch((err) => {
+                errorEl.innerText = 'Correo o contraseña incorrectos.';
+                errorEl.classList.remove('hidden');
+                console.error(err);
+            });
+        }
+
+        function handleLogout() {
+            window.fb.signOut(window.fb.auth);
+        }
+
+        function bootApp() {
+            const { auth, onAuthStateChanged } = window.fb;
+            updateConnectionPill();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    document.getElementById('login-gate').classList.add('hidden');
+                    document.getElementById('app-root').classList.remove('hidden');
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    startListeners();
+                } else {
+                    document.getElementById('login-gate').classList.remove('hidden');
+                    document.getElementById('app-root').classList.add('hidden');
+                    document.getElementById('bottom-nav').classList.add('hidden');
+                    Object.values(unsubs).forEach(unsub => unsub && unsub());
+                }
+            });
+            lucide.createIcons();
+        }
+
+        if (window.fb) bootApp(); else window.addEventListener('fb-ready', bootApp, { once: true });
+
+        // ---------- Listeners en tiempo real ----------
+        function startListeners() {
+            const { db, collection, onSnapshot, query, orderBy, limit } = window.fb;
+
+            unsubs.products = onSnapshot(collection(db, 'products'), (snap) => {
+                state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            });
+
+            unsubs.costs = onSnapshot(collection(db, 'product_costs'), (snap) => {
+                state.costs = {};
+                snap.docs.forEach(d => { state.costs[d.id] = d.data(); });
+                renderAll();
+            });
+
+            const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(200));
+            unsubs.orders = onSnapshot(ordersQuery, (snap) => {
+                state.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            });
+
+            const movementsQuery = query(collection(db, 'inventory_movements'), orderBy('createdAt', 'desc'), limit(100));
+            unsubs.movements = onSnapshot(movementsQuery, (snap) => {
+                state.movements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderMovements();
+            });
+
+            unsubs.expenses = onSnapshot(collection(db, 'expenses'), (snap) => {
+                state.expenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderExpenses();
+                renderDashboard();
+            });
+        }
+
+        function renderAll() {
+            renderDashboard();
+            renderPagos();
+            renderInventoryTable();
+            populateMovementProductSelect();
+        }
+
+        // ---------- Navegación ----------
+        function switchAppTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${tab}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ================= DASHBOARD =================
+        function renderDashboard() {
+            const validOrders = state.orders.filter(o => o.status !== 'cancelado');
+            const revenue = validOrders.reduce((acc, o) => acc + (o.total || 0), 0);
+
+            // Costo de mercancía vendida (estimado con el costo ACTUAL de cada producto, no el histórico exacto)
+            let cogs = 0;
+            validOrders.forEach(o => {
+                (o.items || []).forEach(it => {
+                    cogs += (productCost(it.productId) * it.qty);
+                });
+            });
+            const expensesTotal = state.expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+            const netProfit = revenue - cogs - expensesTotal;
+
+            document.getElementById('stat-revenue').innerText = money(revenue);
+            document.getElementById('stat-net-profit').innerText = money(netProfit);
+
+            const inventoryValue = state.products.reduce((acc, p) => acc + (productCost(p.id) * p.stock), 0);
+            document.getElementById('stat-inventory-value').innerText = money(inventoryValue);
+
+            const pendingOrders = state.orders.filter(o => o.status !== 'cancelado' && (o.paymentStatus || 'pendiente') === 'pendiente');
+            const pendingTotal = pendingOrders.reduce((acc, o) => acc + (o.total || 0), 0);
+            document.getElementById('stat-pending-payments').innerText = money(pendingTotal);
+            document.getElementById('stat-pending-count').innerText = `${pendingOrders.length} pedido${pendingOrders.length === 1 ? '' : 's'}`;
+
+            renderSalesChart(validOrders);
+            renderLowStock();
+            renderRecentOrders();
+        }
+
+        function renderSalesChart(validOrders) {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push(d);
+            }
+            const totals = days.map(day => {
+                return validOrders.reduce((acc, o) => {
+                    const created = o.createdAt?.toDate ? o.createdAt.toDate() : null;
+                    if (!created) return acc;
+                    return (created.toDateString() === day.toDateString()) ? acc + (o.total || 0) : acc;
+                }, 0);
+            });
+            const max = Math.max(...totals, 1);
+
+            const chart = document.getElementById('sales-chart');
+            chart.innerHTML = days.map((day, i) => {
+                const heightPct = Math.max((totals[i] / max) * 100, 4);
+                const label = day.toLocaleDateString('es-MX', { weekday: 'short' }).slice(0, 3);
+                return `
+                <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                    <span class="text-[9px] font-bold text-[#078A85]">${totals[i] > 0 ? '$' + Math.round(totals[i]) : ''}</span>
+                    <div class="w-full bg-[#078A85] rounded-t-md" style="height: ${heightPct}%; min-height: 4px;"></div>
+                    <span class="text-[9px] text-[#0B1D21]/50 uppercase font-bold">${label}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLowStock() {
+            const lowStock = state.products.filter(p => !p.comingSoon && p.stock <= 3).sort((a, b) => a.stock - b.stock);
+            const list = document.getElementById('low-stock-list');
+            if (lowStock.length === 0) {
+                list.innerHTML = `<p class="text-xs text-[#0B1D21]/50 text-center py-3">Todo el inventario está en buen nivel ✅</p>`;
+                return;
+            }
+            list.innerHTML = lowStock.map(p => `
+                <div class="flex justify-between items-center bg-[#E81E4A]/5 rounded-lg px-3 py-2">
+                    <span class="text-xs font-semibold">${p.name}</span>
+                    <span class="text-xs font-black text-[#E81E4A]">${p.stock} pzs</span>
+                </div>`).join('');
+        }
+
+        function renderRecentOrders() {
+            const recent = state.orders.slice(0, 5);
+            const list = document.getElementById('recent-orders-list');
+            if (recent.length === 0) {
+                list.innerHTML = `<p class="text-xs text-[#0B1D21]/50 text-center py-3">Sin pedidos todavía.</p>`;
+                return;
+            }
+            list.innerHTML = recent.map(o => {
+                const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '—';
+                return `
+                <div class="flex justify-between items-center bg-[#EDD5C5]/20 rounded-lg px-3 py-2">
+                    <div>
+                        <p class="text-xs font-bold">${o.customerName || 'Cliente'}</p>
+                        <p class="text-[10px] text-[#0B1D21]/50">${date}</p>
+                    </div>
+                    <span class="text-xs font-black text-[#078A85]">${money(o.total)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // ================= PAGOS =================
+        function setPagosFilter(filter) {
+            pagosFilter = filter;
+            document.querySelectorAll('.pagos-filter-btn').forEach(btn => {
+                btn.className = 'pagos-filter-btn bg-white text-[#0B1D21] font-display font-bold px-4 py-2 rounded-full text-xs brutal-border-sm';
+            });
+            document.getElementById(`pagos-filter-${filter}`).className = 'pagos-filter-btn bg-[#0B1D21] text-white font-display font-bold px-4 py-2 rounded-full text-xs brutal-border-sm';
+            renderPagos();
+        }
+
+        function renderPagos() {
+            let orders = state.orders.filter(o => o.status !== 'cancelado');
+            if (pagosFilter !== 'todos') {
+                orders = orders.filter(o => (o.paymentStatus || 'pendiente') === pagosFilter);
+            }
+
+            const list = document.getElementById('pagos-list');
+            if (orders.length === 0) {
+                list.innerHTML = `<p class="text-xs text-[#0B1D21]/50 text-center py-8">No hay pedidos en esta categoría.</p>`;
+                return;
+            }
+
+            list.innerHTML = orders.map(o => {
+                const isPaid = (o.paymentStatus || 'pendiente') === 'pagado';
+                const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+                return `
+                <div class="bg-white brutal-border-sm brutal-shadow-sm rounded-xl p-4 flex flex-col gap-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-display font-bold text-sm">${o.customerName || 'Cliente'}</p>
+                            <p class="text-[10px] text-[#0B1D21]/50">${date} · ${o.paymentMethod || '—'}</p>
+                        </div>
+                        <span class="font-display font-black text-[#E81E4A]">${money(o.total)}</span>
+                    </div>
+                    <button onclick="togglePaymentStatus('${o.id}', ${isPaid})" class="w-full ${isPaid ? 'bg-[#078A85]' : 'bg-[#ffab00]'} text-white font-bold py-2 rounded-full brutal-border-sm text-xs">
+                        ${isPaid ? '✓ Pagado — marcar como pendiente' : '⏳ Pendiente — marcar como pagado'}
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        async function togglePaymentStatus(orderId, currentIsPaid) {
+            const { db, doc, updateDoc } = window.fb;
+            try {
+                await updateDoc(doc(db, 'orders', orderId), { paymentStatus: currentIsPaid ? 'pendiente' : 'pagado' });
+                showToast('Estado de pago actualizado');
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo actualizar (revisa tu conexión)', 'error');
+            }
+        }
+
+        // ================= INVENTARIO =================
+        function populateMovementProductSelect() {
+            const select = document.getElementById('mov-product');
+            const currentValue = select.value;
+            select.innerHTML = state.products
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(p => `<option value="${p.id}">${p.name} (stock: ${p.stock})</option>`).join('');
+            if (currentValue) select.value = currentValue;
+        }
+
+        function renderInventoryTable() {
+            const table = document.getElementById('inventory-table');
+            const sorted = state.products.slice().sort((a, b) => a.name.localeCompare(b.name));
+            table.innerHTML = sorted.map(p => {
+                const cost = productCost(p.id);
+                const margin = p.price > 0 ? (((p.price - cost) / p.price) * 100) : 0;
+                const marginColor = margin >= 30 ? 'text-[#078A85]' : margin >= 10 ? 'text-[#ffab00]' : 'text-[#E81E4A]';
+                return `
+                <tr class="border-b border-[#0B1D21]/10">
+                    <td class="py-2 font-semibold">${p.name}</td>
+                    <td class="py-2 text-center ${p.stock <= 3 ? 'text-[#E81E4A] font-bold' : ''}">${p.stock}</td>
+                    <td class="py-2 text-right">${money(cost)}</td>
+                    <td class="py-2 text-right">${money(p.price)}</td>
+                    <td class="py-2 text-right font-bold ${marginColor}">${margin.toFixed(0)}%</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderMovements() {
+            const list = document.getElementById('movements-list');
+            if (state.movements.length === 0) {
+                list.innerHTML = `<p class="text-xs text-[#0B1D21]/50 text-center py-4">Sin movimientos registrados.</p>`;
+                return;
+            }
+            list.innerHTML = state.movements.slice(0, 30).map(m => {
+                const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                const isEntry = m.type === 'entrada';
+                return `
+                <div class="flex justify-between items-center bg-[#EDD5C5]/20 rounded-lg px-3 py-2">
+                    <div>
+                        <p class="text-xs font-bold">${isEntry ? '📥' : '📤'} ${m.productName}</p>
+                        <p class="text-[10px] text-[#0B1D21]/50">${date}${m.note ? ' · ' + m.note : ''}</p>
+                    </div>
+                    <span class="text-xs font-black ${isEntry ? 'text-[#078A85]' : 'text-[#E81E4A]'}">${isEntry ? '+' : '-'}${m.quantity}</span>
+                </div>`;
+            }).join('');
+        }
+
+        async function handleAddMovement(e) {
+            e.preventDefault();
+            const { db, doc, runTransaction, collection, addDoc, serverTimestamp, setDoc } = window.fb;
+
+            const type = document.getElementById('mov-type').value;
+            const productId = document.getElementById('mov-product').value;
+            const qty = parseInt(document.getElementById('mov-qty').value);
+            const unitCost = parseFloat(document.getElementById('mov-cost').value) || 0;
+            const note = document.getElementById('mov-note').value.trim();
+
+            const product = state.products.find(p => p.id === productId);
+            if (!product || isNaN(qty) || qty <= 0) {
+                showToast('Revisa el producto y la cantidad', 'error');
+                return;
+            }
+            if (type === 'salida' && qty > product.stock) {
+                showToast('No puedes sacar más stock del que existe', 'error');
+                return;
+            }
+
+            try {
+                await runTransaction(db, async (tx) => {
+                    const productRef = doc(db, 'products', productId);
+                    const snap = await tx.get(productRef);
+                    const currentStock = snap.data().stock;
+                    const newStock = type === 'entrada' ? currentStock + qty : currentStock - qty;
+                    tx.update(productRef, { stock: newStock });
+
+                    if (type === 'entrada' && unitCost > 0) {
+                        const costRef = doc(db, 'product_costs', productId);
+                        const costSnap = await tx.get(costRef);
+                        const oldCost = costSnap.exists() ? (costSnap.data().cost || 0) : 0;
+                        const oldStock = currentStock;
+                        // Costo promedio ponderado: mezcla el costo anterior con el nuevo lote que entra
+                        const newAvgCost = (oldStock + qty) > 0 ? ((oldStock * oldCost) + (qty * unitCost)) / (oldStock + qty) : unitCost;
+                        tx.set(costRef, { cost: newAvgCost, updatedAt: serverTimestamp() }, { merge: true });
+                    }
+                });
+
+                await addDoc(collection(db, 'inventory_movements'), {
+                    type, productId, productName: product.name, quantity: qty,
+                    unitCost: type === 'entrada' ? unitCost : null,
+                    note: note || null,
+                    createdAt: serverTimestamp()
+                });
+
+                showToast(type === 'entrada' ? '¡Entrada registrada!' : 'Salida registrada');
+                document.getElementById('movement-form').reset();
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo registrar el movimiento', 'error');
+            }
+        }
+
+        // ================= COSTOS =================
+        function runCalculator() {
+            const cost = parseFloat(document.getElementById('calc-cost').value) || 0;
+            const price = parseFloat(document.getElementById('calc-price').value) || 0;
+            const qty = parseInt(document.getElementById('calc-qty').value) || 1;
+
+            const profitPerUnit = price - cost;
+            const marginPct = price > 0 ? (profitPerUnit / price) * 100 : 0;
+            const markupPct = cost > 0 ? (profitPerUnit / cost) * 100 : 0;
+            const totalProfit = profitPerUnit * qty;
+
+            const result = document.getElementById('calc-result');
+            result.innerHTML = `
+                <div class="bg-white rounded-lg p-2.5 brutal-border-sm">
+                    <p class="text-[9px] font-bold text-[#0B1D21]/50 uppercase">Ganancia/unidad</p>
+                    <p class="font-display font-black ${profitPerUnit >= 0 ? 'text-[#078A85]' : 'text-[#E81E4A]'}">${money(profitPerUnit)}</p>
+                </div>
+                <div class="bg-white rounded-lg p-2.5 brutal-border-sm">
+                    <p class="text-[9px] font-bold text-[#0B1D21]/50 uppercase">Margen</p>
+                    <p class="font-display font-black ${marginPct >= 30 ? 'text-[#078A85]' : marginPct >= 10 ? 'text-[#ffab00]' : 'text-[#E81E4A]'}">${marginPct.toFixed(1)}%</p>
+                </div>
+                <div class="bg-white rounded-lg p-2.5 brutal-border-sm">
+                    <p class="text-[9px] font-bold text-[#0B1D21]/50 uppercase">Markup sobre costo</p>
+                    <p class="font-display font-black text-[#0B1D21]">${markupPct.toFixed(1)}%</p>
+                </div>
+                <div class="bg-white rounded-lg p-2.5 brutal-border-sm">
+                    <p class="text-[9px] font-bold text-[#0B1D21]/50 uppercase">Ganancia total (${qty} pzs)</p>
+                    <p class="font-display font-black ${totalProfit >= 0 ? 'text-[#078A85]' : 'text-[#E81E4A]'}">${money(totalProfit)}</p>
+                </div>
+            `;
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expenses-list');
+            const sorted = state.expenses.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            if (sorted.length === 0) {
+                list.innerHTML = `<p class="text-xs text-[#0B1D21]/50 text-center py-3">Sin gastos registrados.</p>`;
+            } else {
+                list.innerHTML = sorted.map(exp => `
+                    <div class="flex justify-between items-center bg-[#EDD5C5]/20 rounded-lg px-3 py-2">
+                        <div>
+                            <p class="text-xs font-bold">${exp.description}</p>
+                            <p class="text-[10px] text-[#0B1D21]/50">${exp.date || '—'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-[#E81E4A]">${money(exp.amount)}</span>
+                            <button onclick="deleteExpense('${exp.id}')" class="text-[#0B1D21]/40 hover:text-[#E81E4A]"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>`).join('');
+            }
+            const total = state.expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+            document.getElementById('expenses-total').innerText = money(total);
+            lucide.createIcons();
+        }
+
+        async function handleAddExpense(e) {
+            e.preventDefault();
+            const { db, collection, addDoc, serverTimestamp } = window.fb;
+            const description = document.getElementById('expense-desc').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const date = document.getElementById('expense-date').value || new Date().toISOString().slice(0, 10);
+
+            if (!description || isNaN(amount) || amount <= 0) {
+                showToast('Revisa la descripción y el monto', 'error');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'expenses'), { description, amount, date, createdAt: serverTimestamp() });
+                showToast('Gasto agregado');
+                document.getElementById('expense-form').reset();
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo agregar el gasto', 'error');
+            }
+        }
+
+        async function deleteExpense(id) {
+            const { db, doc, deleteDoc } = window.fb;
+            try {
+                await deleteDoc(doc(db, 'expenses', id));
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo eliminar el gasto', 'error');
+            }
+        }
+
+        // Registrar el Service Worker para poder instalar la app y usarla sin conexión
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('gestion-sw.js').catch(err => console.warn('Service worker no registrado:', err));
+            });
+        }
+    </script>
+</body>
+</html>
