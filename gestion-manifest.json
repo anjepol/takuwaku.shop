@@ -1,0 +1,24 @@
+{
+  "name": "Gestión Takuwaku",
+  "short_name": "Gestión",
+  "description": "Dashboard, pagos, inventario y costos de Takuwaku",
+  "start_url": "gestion.html",
+  "display": "standalone",
+  "background_color": "#0B1D21",
+  "theme_color": "#0B1D21",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logoTW.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logoTW.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
